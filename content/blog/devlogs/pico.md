@@ -4,6 +4,8 @@ date: 2 November 2025
 draft: true
 ---
 
+## Introduction
+
 While on an failed attempt to 100%-ing [Celeste](https://www.celestegame.com/), I was reminded that PICO-8 exists. I had to finish a mini-game, which was a PICO-8 version of celeste. 
 
 ![https://u.cubeupload.com/namishhhh/maxresdefault.jpg](https://u.cubeupload.com/namishhhh/maxresdefault.jpg)
@@ -18,7 +20,7 @@ And so, I set out on a small goal for myself, squeezing the most game juice (and
 
 ![https://u.cubeupload.com/namishhhh/Screenshot20251103at.png](https://u.cubeupload.com/namishhhh/Screenshot20251103at.png)
 
-So above was the sprite I was able to draw with the 64 pixels I was given. This, will be my ship. PICO-8 has really easy inbuilt functions like `SPR()` to draw a sprite. Drawing a basic character controller, was barely a minute of work.
+So above was the sprite I was able to draw with the 64 pixels I was given. This, will be my ship. PICO-8 has really easy inbuilt functions like `SPR()` to draw a sprite. Drawing and creating a basic character controller, was barely a minute of work.
 
 ![https://u.cubeupload.com/namishhhh/180Screenshot20251103at.png](https://u.cubeupload.com/namishhhh/180Screenshot20251103at.png)
 
