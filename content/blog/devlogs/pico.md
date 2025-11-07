@@ -32,7 +32,7 @@ Let us also sprinkle some "life" into the space where our ship is flying around.
 
 ![https://u.cubeupload.com/namishhhh/dc8Screenshot20251103at.png](https://u.cubeupload.com/namishhhh/dc8Screenshot20251103at.png)
 
-We are actually not "drawing rectangles" here, PICO-8 gives us this built-in called `PXSET` which can be used to set the color of a specific pixel. It is not possilbe to draw `1x1` rectangles using PICO-8's rectangle function
+We are actually not "drawing rectangles" here, PICO-8 gives us this built-in called `PSET` which can be used to set the color of a specific pixel. It is not possilbe to draw `1x1` rectangles using PICO-8's rectangle function
 
 Now to add life to these stars, we can apply some techniques: 
 
@@ -165,3 +165,85 @@ But it looked really bad, so I made a couple of changes to it. First, as a visua
 Next, I made these little indicators of how much bullets/mana is left according to capacity of magazine and cycle through it when shooting or reloading. Combining all of these, we end up with a pretty satisfying result with which we can conclude the core mechanics of your shooting system.
 
 ![img](https://u.cubeupload.com/namishhhh/20251104002123online.gif)
+
+## Explosions and Particles
+
+In order to prepare for explosions, I just added the most basic enemy and all it does it stand idle at one place. If a bullet `collides` with the enemy, we decrease it's health by 10. If health is depleted, it despawns. The collision to check between collision of two sprites is fairly easy
+
+```lua
+function collision(a,b)
+  return (abs(a.x-b.x) + abs(a.y-b.y)) <= 8
+end
+```
+
+And basically if the two ojbects are withing 8 pixels of one another (since the sprites are `8x8`), we count it as collision. It’s a rough check that’s fast and simple for pixel games. I also made the enemy flash white, when get hit. PICO-8 gives us a function `PAL` which can be used to replace colors on a sprite. So on bullet collision with enemy, we add a small flash timer for the enemy and replace all the 16 colors with white. Sprite can be brought back to its original form by calling `PAL` without any arguements.
+
+```lua
+if e[i].flash and e[i].flash > 0 then
+    for c=0,15 do
+        pal(c, 7)
+    end
+    pal()
+end
+```
+
+To make the game satisfying, it should also feel like out bullets have some impact on the enemy. The enemy should not just despawn when it's health goes to 0. So we need to add more particle effects to the game.
+
+<br>
+
+The process to make a big boom is fairly easy. When the enemy dies, I spawn a 25 circles of random sizes with random x and y velocities. But I also want to remove the particles from the screen. So I give them a random max_age, and an age timer. If age exceeds, max_age, the particle is removed from the particles table.
+
+<br>
+
+This is clearly a start but we can make it better. First, I do not want my particles to just disappear when they reach their max_age, so I changed it so that after they reach their max_age, they slowly decreases their size until they are gone and then I remove them from the table. Then I can also cycle the explosion through a bunch of colors to make it look more like an explosion. I also set the `age` to a random number instead of 0 to prevent the particles from changing colors at the same time.
+
+The very last thing I did was to add one big particle before these random particles. This big particle had a very short max_age and was white. This represented the instantaneous "flash" of an explosion.
+
+<br>
+
+![img](https://u.cubeupload.com/namishhhh/simpleexplosion.gif)
+
+Another way I can enhance this was by adding shockwaves. A shockwave i just a circle outline that grows bigger and bigger and then disappears. I made small shockwaves appear when I hit an enemy and big shockwave appears when the enemy dies.
+
+```lua
+function swave(ex, ey, mt)
+	add(swaves, {
+		x = ex,
+		y = ey,
+		r = 2,
+		t = 0,
+		mt = mt ~= nil and mt or 15
+	})
+end
+
+function swave_draw()
+	for s in all(swaves) do
+		local alpha = 1 - (s.t / s.mt)
+		local pc = alpha > 0.5 and 7 or 6
+		circ(s.x, s.y, s.r, pc)
+		s.r += 1.5
+		s.t += 1
+		if s.t > s.mt then
+			del(swaves, s)
+		end
+	end
+end
+```
+
+![image](https://u.cubeupload.com/namishhhh/swaves.gif)
+
+After adding particles to the enemies, it only makes sense to explode and add particles to our ships as well. The first particle effect on our ship is the same explosion we use on the enemy ship when it dies, but on our ship it happens everytime we take damage. This explosion in blue in color and much much smaller.
+
+<br>
+The second and a new effect I did was releasing some smoke particles from our ship when we are low on lifes. It works by adding small grey circles that only go up, but they increase in size as they age and then they despawn when they reach the `max_age`.
+
+
+![img](https://u.cubeupload.com/namishhhh/playerparticles.gif)
+
+Pretty cool. Another thing I did at this point was to make the special attack, actually special. Just giving it a bigger sprite and more damage is kind of lame, which makes waiting for a cooldown for it, even lamer. I want the player to always be thinking when will they get the next chance at firing the special.
+
+<br>
+
+So I modified to be a spreadshot, basically five fireballs firing in an arc infront of the player (using some basic trignometry for which I obviously did not consult AI). 
+
+![img](https://u.cubeupload.com/namishhhh/newsecondary.gif)
