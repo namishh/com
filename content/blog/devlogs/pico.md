@@ -247,3 +247,108 @@ Pretty cool. Another thing I did at this point was to make the special attack, a
 So I modified to be a spreadshot, basically five fireballs firing in an arc infront of the player (using some basic trignometry for which I obviously did not consult AI). 
 
 ![img](https://u.cubeupload.com/namishhhh/newsecondary.gif)
+
+## Progression System
+
+![img](https://u.cubeupload.com/namishhhh/image.jpg)
+
+Now is the time to work on the actual roguelike mechanic of our game, for which I "took inspiration" from [Vampire Survivors](https://store.steampowered.com/app/1794680/Vampire_Survivors/). In that game, when you kill an enemy, it leaves a gem behind and collecting that you can increase your level. After a certain threshold, (when the bar on top fills), you get to select one of the three "boons" to upgrade your player or to upgrade existing weapons. The only change in mine would be that instead of gems, you will collect falling strawberries from dead enemies. The progression system can be broken into two parts.
+
+### Juice Requirement
+
+The straw berry part was easy to code. Spawn a berry where the enemy dies, and just move it downwards, add some horizontal sine wave like movement to it, and if it collides with the player, add to the "juice requirement".
+
+<br>
+
+More interesting part was coming up with the juice requirement and threshold. I did not want to waste tokens of setting up some really comprehensive requirement, instead I wanted a simple one liner formula for getting the requirement at `nth` iteration.
+
+The most easiest would be:
+
+```lua
+function juice_req(n)
+    return 5 * n
+end
+```
+ which goes like
+
+```
+5
+10
+15
+20
+```
+
+But most of these games work on exponential level ups. And I allowed claude to cook me up this formula
+
+```lua
+return flr(3 * (n ^ 1.6))
+```
+
+which went steep real quick so recalibrated it to be `n ^ 1.3`. Now the progression systems goes like
+
+```
+3
+7
+12
+18
+25
+32
+```
+
+Now to complete the progression system we need to add in 
+
+### Boons
+
+![img](https://u.cubeupload.com/namishhhh/VampireSurvivorsleve.jpeg)
+
+I want to have two types of boons, upgrades to the player and adding in spawns, like spawning a bomb. For now, I will only implement the first type, I will add spawns later when I have a comprehensive enemy system. 
+
+So I introduced a bunch of global variables to control each parameter and for the sake of having cleaner code I split them into two tables.
+
+```lua
+mults = {
+    v = 1,       -- player speed
+    pbv = 1,     -- primary bullet velocity
+    pbr = 1,     -- primary bullet rate
+    pd = 1,      -- primary damage
+    sd = 1,      -- secondary damage
+    sbv = 1,     -- secondary bullet velocity
+}
+
+stats = {
+    mmag = 30,       -- magazine size
+    pr = 210,        -- reload time
+    scd = 90,        -- secondary cooldown
+    sc = 5,          -- secondary bullet count
+    sa = deg(30),    -- secondary spread angle
+    l = 4,           -- player lives
+    ml = 5,          -- max lives
+}
+```
+
+The different in these two stats are that each mult in mults table is used like
+
+```lua
+v.x = v * mult.v
+```
+
+while stats are used as it is and we add or subtract from it. Now each boon in my game is defined like
+
+```lua
+{id=12, f=function()
+    stats.sc += 1
+    scount += 1
+end, t="bomb count +1", r=2,
+c=function()
+    return stats.sc < 9
+end
+},
+```
+
+This boon is used to increase the amount of bombs that in the special attack, which is done by the `f` method. The `c` method acts as a check to make it so that the player at maximum can only have 9 bombs. After that the boon stops appearing on the list. The `r` field indicates its rarity and `t` is the text that will be shown on the select menu.
+
+<br>
+
+The select menu in itself is not really hard to implement. It just gives you three boons at random whose `c` method returns true. Then I just show them on top of some overlay and lets the player navigate with arrow keys and select with the primary key. I did run to a lot of input handling bugs in this portion and I had to introduct some more global state variables to handle it.
+
+![img](https://u.cubeupload.com/namishhhh/20251111002613online.gif)
