@@ -6,7 +6,8 @@ draft: true
 
 <div align="center">
 
-<iframe frameborder="0" src="https://itch.io/embed-upload/15633061?color=1e1e23" allowfullscreen="" width = "600" height="450" ><a href="https://namishh.itch.io/space-8">Play space-8 on itch.io</a></iframe>
+
+<iframe frameborder="0" src="https://itch.io/embed-upload/15635269?color=1e1e23" allowfullscreen="" width="600" height="450"><a href="https://namishh.itch.io/space-8">Play space-8 on itch.io</a></iframe>
 
 </div>
 
@@ -415,3 +416,109 @@ enemy.y += enemy.charge_dy * enemy.charge_speed
 ```
 
 ![img](https://u.cubeupload.com/namishhhh/20251124144129online.gif)
+
+
+Now we need enemies, that can actually shoot back. The most basic version was an enemy that moves to and fro horizontally and randomly selected `y-axis` and shoots bullet downwards, pretty basic. Now I also wanted the same enemy but one that shoots at the player, so I added the ability to pass in custom properties when spawning a player.
+
+<br>
+
+With this I made on variant, where it shoots at the player instead of shooting straight, and the last variant where it shoots at the player but the bullets bounce like the DVD logo for 3 times. I have heard many people who have never looked into physics and game dev say bouncing seems pretty hard but it is just inverting the x and the y axis.
+
+```lua
+if b.x < 0 or b.x > 128 then 
+    b.dx *= -1
+    bounced = true
+end
+if b.y < 0 or b.y > playable_height then 
+    b.dy *= -1
+    bounced = true
+end
+```
+
+Then to make this enemy even more hard, I included a "frenzy" state, and when it is this state, instead of shooting one bullet it shoots bursts of bullets rapidly for an amount of time and then goes back to being normal. Because it oscillates back and forth, this enemy is named the "oscillator".
+
+<br>
+
+I also crafted another variant of "oscillator" itself and instead of going back and fro, it roams randomly in the map, stopping at places for short breaks sometimes. And yes, it is named, the "roamer"
+
+![img](https://u.cubeupload.com/namishhhh/roamer.gif)
+
+I then wanted to create an enemy which woudl be kind of inspired by our special attack. So one of them, called the wizard, has 5 fireballs revolving arround him, which he can shoot them outwards at any time. 
+
+And then I edited some of wizard's code to create the merlin, which shoots A LOT of bullets in all directions, swirling them in a bit as we go.
+
+```lua
+if enemy.fire_cooldown <= 0 then
+    for i = 0, 12 do
+    local base_angle = (i / 8) * 1
+    local swirl_angle = base_angle + enemy.swirl_offset
+    local dx = cos(swirl_angle) * 2
+    local dy = sin(swirl_angle) * 2
+    add(ebul, {x = enemy.x + 4, y = enemy.y + 4, dx = dx, dy = dy, wizard = true})
+    end
+    enemy.muzzle = 5
+    enemy.swirl_offset += 0.05
+    enemy.fire_cooldown = 5
+end
+```
+
+Both of them wait for their ealier bullets to despawn before they start roaming for their next attack.
+
+![img](https://u.cubeupload.com/namishhhh/fireee.gif)
+
+I was making my classmates play this game in its early stages and none of them really tried to check the fact that you can go in below and pop up from above like you can in snake. So my next enemy was all about teaching the player that.
+
+Essentially all it does is spawn an entire row or column of bullets that start from either left, right, top, bottom most part of the screen and travel to the other side, and the only way to beat them is if you pop out from the other side (shoutout to [quantinium3](x.com/quantinium3) for still not being able to figure that out).
+
+![img](https://u.cubeupload.com/namishhhh/serc.gif)
+
+The last enemy has an attack that I just straight ripped from the Sans boss fight in Undertale. It has one attack where it flashes a zone in red as a telegraph and you have to just steer away from that area when it flashes white. I did the same, meet the "mercenary" which take 2-3 rectangles with random height, full screen width on the screen and turns them into death zones. Each death zone will flash for some time before there will be series of explosions in that area, if you caught in it, you will take damage.
+
+![img](https://u.cubeupload.com/namishhhh/merc11.gif)
+
+## Wrapping Up
+
+And, by now I had used MORE THAN 90% of the game tokens, so it was time for me to deal with wrapping up the game, instead of adding new features. First I just created a simple Game Over and Start Game screen, nothign fancy at all, it is just really primitive navigation. For the start game however I learned that there is function called `SSPR` which helps us to draw scaled sprites, so I used that,  to create a giant version of our ship in the Start Game screen.
+
+<br>
+
+Even though, no one will reach more than 10k+, I did want to have a way to store large scores. PICO-8 has a 32k limitation, so I started to store digits in a table instead of storing it as a number
+
+```lua
+-- from
+score = 5000
+-- to
+score = {0,0,0,5,0,0,0,0}
+```
+
+and I think it is pretty safe to say NO ONE is reaching 9,99,99,999. To add a number to this table, it starts with the rightmost digit (ones place) and adds the points there. If that digit exceeds 9, it keeps only the ones digit and "carries" the tens value to the next position. This carrying process repeats through each digit position moving left, stopping early if there's nothing left to carry.
+
+```lua
+function add_score(pts)
+  local carry = pts
+  for i = 1, 8 do
+    score[i] += carry
+    carry = flr(score[i] / 10)
+    score[i] = score[i] % 10
+    if carry == 0 then break end
+  end
+end
+```
+
+I also wrote a function to check if the current score is greater than highscore. If the first score's digit is larger, that score is greater and return true immediately. If it's smaller, that score is less and return false immediately. If they're equal, move to the next digit and repeat for 8 digits
+
+```lua
+function score_gt(s1, s2)
+  for i = 8, 1, -1 do
+    if s1[i] > s2[i] then return true end
+    if s1[i] < s2[i] then return false end
+  end
+  return false
+end
+```
+
+And... with that I have used 8180 of 8192 tokens available. There is so MUCH I wanted to add like sound effects, and spawn-type boons, which I mentioned earlier, but it seems I have run out of space.
+
+<br>
+
+This was a really fun project to make, and it took me a lot of time mainly because I had mid sems going on, so I was barely giving this 30 minutes a day, but I really enjoyed it. I know it seems like a really simple game but I really enjoyed the development process and PICO-8 felt similiar to what it felt like when I created my first HTML page six years ago. Until next time, goodbye!
