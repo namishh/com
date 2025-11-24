@@ -4,6 +4,12 @@ date: 2 November 2025
 draft: true
 ---
 
+<div align="center">
+
+<iframe frameborder="0" src="https://itch.io/embed-upload/15633061?color=1e1e23" allowfullscreen="" width = "600" height="450" ><a href="https://namishh.itch.io/space-8">Play space-8 on itch.io</a></iframe>
+
+</div>
+
 ## Introduction
 
 While on an failed attempt to 100% [Celeste](https://www.celestegame.com/), I encountered a PICO-8 version of Celeste, inside Celeste itself. I had heard of it before, but never fully ventured in, and I got a bit intruiged by it.
@@ -47,7 +53,7 @@ for i = 1, #stars do
     elseif stars[i].speed < 1 then scol = 13 --far, grey
     elseif stars[i].speed > 1.5 then scol = 7 -- near, white
     end
-    pset(stars[i].x, stars[i].y, scol)
+    pset(stars[i].x, stars[i].y, scol)  
 end
 ```
 
@@ -349,6 +355,63 @@ This boon is used to increase the amount of bombs that in the special attack, wh
 
 <br>
 
-The select menu in itself is not really hard to implement. It just gives you three boons at random whose `c` method returns true. Then I just show them on top of some overlay and lets the player navigate with arrow keys and select with the primary key. I did run to a lot of input handling bugs in this portion and I had to introduct some more global state variables to handle it.
+The select menu in itself is not really hard to implement. It just gives you three boons at random whose `c` method returns true. Then I just show them on top of some overlay and lets the player navigate with arrow keys and select with the primary key. I did run into a lot of input handling bugs in this portion and I had to introduce some more global state variables to handle it.
 
 ![img](https://u.cubeupload.com/namishhhh/20251111002613online.gif)
+
+## Enemies
+
+Time to remove these cardboard cutouts and replace them with actual enemies. To start off, The first kind of enemy was really simple. Just follow the player, and rightfully so, called it the "Follower". 
+
+<br>
+
+The system for creating enemies is really dead simple, I have defined enemies in a table where each entry includes some basic information about them.
+
+```lua
+follower = {
+    h = 30,
+    pts = 20,
+    sprite=9,
+    sprite_end = 12,
+    speed = 0.5,
+    update = update_follower,
+    states = { "spawn", "active","dead"}
+}
+```
+
+`states` define all the possible states the enemy can be in. The `spawn` and `dead` states are common to all enemies. During the `spawn` state we have the player spawn in some random place outside the screen and have it travel in, so it looks like he is coming to attack us. The `death` state just removes the enemy from the enemies table.
+
+For the follower, we do not need any more state than "active" because all it does is.... follow us. We just use some basic maths to move the enemy towards the player
+
+```lua
+local dx = posx - enemy.x
+local dy = posy - enemy.y
+local dist = sqrt(dx*dx + dy*dy)
+    
+if dist > 0 then
+    enemy.x += (dx / dist) * enemy.speed
+    enemy.y += (dy / dist) * enemy.speed
+end
+```
+
+Inspired from the follower, I added another type of enemy, which charges up and lunges at us, compared to just following us forever. This enemy had a slightly more complex state machine. It had:
+
+```lua
+states = {"spawn", "idle", "charging", "charging_up", "dead", "cooldown"}
+```
+
+I added a really small charging_up state, in which the charcter blinks between two alternate sprites, to indicate that it is gonna fire off soon. For the charging, we just move it in the player's direction for 15 frames, so by then its confirmed that it would have reached the player (real smart). To give it a more realistic feel, I made it's charge speed go up initially and then go down.
+
+```lua
+if enemy.charge_timer > 15 then
+    enemy.charge_speed += 0.3
+else
+    enemy.charge_speed -= 0.2
+    if enemy.charge_speed < 0 then enemy.charge_speed = 0 end
+end
+
+enemy.x += enemy.charge_dx * enemy.charge_speed
+enemy.y += enemy.charge_dy * enemy.charge_speed
+```
+
+![img](https://u.cubeupload.com/namishhhh/20251124144129online.gif)
