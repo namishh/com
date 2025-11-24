@@ -13,7 +13,7 @@ draft: false
 
 ## Introduction
 
-While on an failed attempt to 100% [Celeste](https://www.celestegame.com/), I encountered a PICO-8 version of Celeste, inside Celeste itself. I had heard of it before, but never fully ventured in, and I got a bit intruiged by it.
+While on a failed attempt to 100% [Celeste](https://www.celestegame.com/), I encountered a PICO-8 version of Celeste, inside Celeste itself. I had heard of it before, but never fully ventured in, and I got a bit intruiged by it.
 
 ![https://u.cubeupload.com/namishhhh/maxresdefault.jpg](https://u.cubeupload.com/namishhhh/maxresdefault.jpg)
 
@@ -27,7 +27,7 @@ And so, I set out on a small goal for myself, squeezing the most game juice (and
 
 ![https://u.cubeupload.com/namishhhh/Screenshot20251103at.png](https://u.cubeupload.com/namishhhh/Screenshot20251103at.png)
 
-So above was the sprite I was able to draw with the 64 pixels I was given. This, will be my ship. PICO-8 has really a easy inbuilt function called `SPR()` to draw a sprite. Drawing and creating a basic character controller, was barely a minute of work.
+So above was the sprite I was able to draw with the 64 pixels I was given. This, will be my ship. PICO-8 has really easy inbuilt function called `SPR()` to draw a sprite. Drawing and creating a basic character controller, was barely a minute of work.
 
 ![https://u.cubeupload.com/namishhhh/180Screenshot20251103at.png](https://u.cubeupload.com/namishhhh/180Screenshot20251103at.png)
 
@@ -39,7 +39,7 @@ Let us also sprinkle some "life" into the space where our ship is flying around.
 
 ![https://u.cubeupload.com/namishhhh/dc8Screenshot20251103at.png](https://u.cubeupload.com/namishhhh/dc8Screenshot20251103at.png)
 
-We are actually not "drawing rectangles" here, PICO-8 gives us this built-in called `PSET` which can be used to set the color of a specific pixel. It is not possilbe to draw `1x1` rectangles using PICO-8's rectangle function
+We are actually not "drawing rectangles" here, PICO-8 gives us this built-in function called `PSET` which can be used to set the color of a specific pixel. It is not possilbe to draw `1x1` rectangles using PICO-8's rectangle function
 
 Now to add life to these stars, we can apply some techniques: 
 
@@ -175,7 +175,7 @@ Next, I made these little indicators of how much bullets/mana is left according 
 
 ## Explosions and Particles
 
-In order to prepare for explosions, I just added the most basic enemy and all it does it stand idle at one place. If a bullet `collides` with the enemy, we decrease it's health by 10. If health is depleted, it despawns. The collision to check between collision of two sprites is fairly easy
+In order to prepare for explosions, I just added the most basic enemy and, all it does it stand idle at one place. If a bullet `collides` with the enemy, we decrease it's health by 10. If health is depleted, it despawns. The collision to check between collision of two sprites is fairly easy
 
 ```lua
 function collision(a,b)
@@ -183,7 +183,7 @@ function collision(a,b)
 end
 ```
 
-And basically if the two ojbects are within 8 pixels of one another (since the sprites are `8x8`), we count it as collision. It’s a rough check that’s fast and simple for pixel games. I also made the enemy flash white, when get hit. PICO-8 gives us a function `PAL` which can be used to replace colors on a sprite. So on bullet collision with enemy, we add a small flash timer for the enemy and replace all the 16 colors with white. Sprite can be brought back to its original form by calling `PAL` without any arguements.
+And basically if the two objects are within 8 pixels of one another (since the sprites are `8x8`), we count it as collision. It’s a rough check that’s fast and simple for pixel games. I also made the enemy flash white, when get hit. PICO-8 gives us a function `PAL` which can be used to replace colors on a sprite. So on bullet collision with enemy, we add a small flash timer for the enemy and replace all the 16 colors with white. Sprite can be brought back to its original form by calling `PAL` without any arguements.
 
 ```lua
 if e[i].flash and e[i].flash > 0 then
@@ -194,7 +194,7 @@ if e[i].flash and e[i].flash > 0 then
 end
 ```
 
-To make the game satisfying, it should also feel like out bullets have some impact on the enemy. The enemy should not just despawn when it's health goes to 0. So we need to add more particle effects to the game.
+To make the game satisfying, it should also feel like our bullets have some impact on the enemy. The enemy should not just despawn when it's health goes to 0. So we need to add more particle effects to the game.
 
 <br>
 
@@ -210,7 +210,7 @@ The very last thing I did was to add one big particle before these random partic
 
 ![img](https://u.cubeupload.com/namishhhh/simpleexplosion.gif)
 
-Another way I can enhance this was by adding shockwaves. A shockwave i just a circle outline that grows bigger and bigger and then disappears. I made small shockwaves appear when I hit an enemy and big shockwave appears when the enemy dies.
+Another way I can enhance this was by adding shockwaves. A shockwave is just a circle outline that grows bigger and bigger and then disappears. I made small shockwaves appear when I hit an enemy and big shockwave appears when the enemy dies.
 
 ```lua
 function swave(ex, ey, mt)
@@ -356,7 +356,7 @@ This boon is used to increase the amount of bombs that in the special attack, wh
 
 <br>
 
-The select menu in itself is not really hard to implement. It just gives you three boons at random whose `c` method returns true. Then I just show them on top of some overlay and lets the player navigate with arrow keys and select with the primary key. I did run into a lot of input handling bugs in this portion and I had to introduce some more global state variables to handle it.
+The select menu in itself is not really hard to implement. It just gives you three boons at random whose `c` method returns true. Then I just show them on top of some overlay and allows the player navigate with arrow keys and select with the primary key. I did run into a lot of input handling bugs in this portion and I had to introduce some more global state variables to handle it.
 
 ![img](https://u.cubeupload.com/namishhhh/20251111002613online.gif)
 
@@ -418,11 +418,11 @@ enemy.y += enemy.charge_dy * enemy.charge_speed
 ![img](https://u.cubeupload.com/namishhhh/20251124144129online.gif)
 
 
-Now we need enemies, that can actually shoot back. The most basic version was an enemy that moves to and fro horizontally and randomly selected `y-axis` and shoots bullet downwards, pretty basic. Now I also wanted the same enemy but one that shoots at the player, so I added the ability to pass in custom properties when spawning a player.
+Now we need enemies, that can actually shoot back. The most basic version was an enemy that moves to and fro horizontally on randomly selected `y-axis` and shoots bullet downwards, pretty basic. Now I also wanted the same enemy but one that shoots at the player, so I added the ability to pass in custom properties when spawning a player.
 
 <br>
 
-With this I made on variant, where it shoots at the player instead of shooting straight, and the last variant where it shoots at the player but the bullets bounce like the DVD logo for 3 times. I have heard many people who have never looked into physics and game dev say bouncing seems pretty hard but it is just inverting the x and the y axis.
+With this I made a variant, where it shoots at the player instead of shooting straight, and the last variant where it shoots at the player but the bullets bounce like the DVD logo for 3 times. I have heard many people who have never looked into physics and game dev say bouncing seems pretty hard but it is just inverting the x and the y axis.
 
 ```lua
 if b.x < 0 or b.x > 128 then 
@@ -462,7 +462,7 @@ if enemy.fire_cooldown <= 0 then
 end
 ```
 
-Both of them wait for their ealier bullets to despawn before they start roaming for their next attack.
+Both of them wait for their earlier bullets to despawn before they start roaming for their next attack.
 
 ![img](https://u.cubeupload.com/namishhhh/fireee.gif)
 
@@ -478,7 +478,7 @@ The last enemy has an attack that I just straight ripped from the Sans boss figh
 
 ## Wrapping Up
 
-And, by now I had used MORE THAN 90% of the game tokens, so it was time for me to deal with wrapping up the game, instead of adding new features. First I just created a simple Game Over and Start Game screen, nothign fancy at all, it is just really primitive navigation. For the start game however I learned that there is function called `SSPR` which helps us to draw scaled sprites, so I used that,  to create a giant version of our ship in the Start Game screen.
+And, by now I had used MORE THAN 90% of the game tokens, so it was time for me to deal with wrapping up the game, instead of adding new features. First I just created a simple Game Over and Start Game screen, nothing fancy at all, it is just really primitive navigation. For the start game however I learned that there is function called `SSPR` which helps us to draw scaled sprites, so I used that,  to create a giant version of our ship in the Start Game screen.
 
 <br>
 
