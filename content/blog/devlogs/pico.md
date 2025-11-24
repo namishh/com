@@ -1,7 +1,7 @@
 ---
 title: Pico 8 Adventures 
 date: 2 November 2025
-draft: true
+draft: false
 ---
 
 <div align="center">
@@ -17,7 +17,7 @@ While on an failed attempt to 100% [Celeste](https://www.celestegame.com/), I en
 
 ![https://u.cubeupload.com/namishhhh/maxresdefault.jpg](https://u.cubeupload.com/namishhhh/maxresdefault.jpg)
 
-After digging into PICO-8 a bit more, I could not resist grabbing a copy of my own to experiment with it. Shortly after exploring around the editor, I noticed some things. There were only 16 colors, you had a 8192 tokens limit on your code and you are limited to only 8x8 pixel art (which, in hindsight should have been obvious from the name). Oh, and no shaders, which is a bummer because they really help enhance the looks of my abysmal pixel art. These are some really tight limitations and things I never even noticed while playing Celeste's PICO-8 version. This really seemed kind of insane to me, because I had been working on my little [top down dungeon crawler](https://x.com/namishh__/status/1978791461174100430) and it is already over 16k lines of code, let alone 8192 tokens.
+After digging into PICO-8 a bit more, I could not resist grabbing a copy of my own to experiment with it. Shortly after exploring around the editor, I noticed some things. There were only 16 colors, you had a 8192 token limit on your code and you are limited to only 8x8 pixel art (which, in hindsight should have been obvious from the name). Oh, and no shaders, which is a bummer because they really help enhance the looks of my abysmal pixel art. These are some really tight limitations and things I never even noticed while playing Celeste's PICO-8 version. This really seemed kind of insane to me, because I had been working on my little [top down dungeon crawler](https://x.com/namishh__/status/1978791461174100430) and it is already over 16k lines of code, let alone 8192 tokens.
 
 <br>
 
@@ -183,7 +183,7 @@ function collision(a,b)
 end
 ```
 
-And basically if the two ojbects are withing 8 pixels of one another (since the sprites are `8x8`), we count it as collision. It’s a rough check that’s fast and simple for pixel games. I also made the enemy flash white, when get hit. PICO-8 gives us a function `PAL` which can be used to replace colors on a sprite. So on bullet collision with enemy, we add a small flash timer for the enemy and replace all the 16 colors with white. Sprite can be brought back to its original form by calling `PAL` without any arguements.
+And basically if the two ojbects are within 8 pixels of one another (since the sprites are `8x8`), we count it as collision. It’s a rough check that’s fast and simple for pixel games. I also made the enemy flash white, when get hit. PICO-8 gives us a function `PAL` which can be used to replace colors on a sprite. So on bullet collision with enemy, we add a small flash timer for the enemy and replace all the 16 colors with white. Sprite can be brought back to its original form by calling `PAL` without any arguements.
 
 ```lua
 if e[i].flash and e[i].flash > 0 then
@@ -362,7 +362,7 @@ The select menu in itself is not really hard to implement. It just gives you thr
 
 ## Enemies
 
-Time to remove these cardboard cutouts and replace them with actual enemies. To start off, The first kind of enemy was really simple. Just follow the player, and rightfully so, called it the "Follower". 
+Time to remove these cardboard cutouts and replace them with actual enemies. To start off, The first kind of enemy was really simple. Just follows the player, and rightfully so, called it the "follower". 
 
 <br>
 
@@ -443,7 +443,7 @@ I also crafted another variant of "oscillator" itself and instead of going back 
 
 ![img](https://u.cubeupload.com/namishhhh/roamer.gif)
 
-I then wanted to create an enemy which woudl be kind of inspired by our special attack. So one of them, called the wizard, has 5 fireballs revolving arround him, which he can shoot them outwards at any time. 
+I then wanted to create an enemy which would be inspired by our special attack. So one of them, called the wizard, has 5 fireballs revolving arround him, which he can shoot them outwards at any time. 
 
 And then I edited some of wizard's code to create the merlin, which shoots A LOT of bullets in all directions, swirling them in a bit as we go.
 
@@ -466,7 +466,7 @@ Both of them wait for their ealier bullets to despawn before they start roaming 
 
 ![img](https://u.cubeupload.com/namishhhh/fireee.gif)
 
-I was making my classmates play this game in its early stages and none of them really tried to check the fact that you can go in below and pop up from above like you can in snake. So my next enemy was all about teaching the player that.
+I was making my classmates play this game in the early stages and none of them really tried to check the fact that you can go in below and pop up from above like you can in snake. So my next enemy was all about teaching the player that.
 
 Essentially all it does is spawn an entire row or column of bullets that start from either left, right, top, bottom most part of the screen and travel to the other side, and the only way to beat them is if you pop out from the other side (shoutout to [quantinium3](x.com/quantinium3) for still not being able to figure that out).
 
