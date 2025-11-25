@@ -38,21 +38,21 @@ draft: false
 
 ## Introduction
 
-While on a failed attempt to 100% [Celeste](https://www.celestegame.com/), I encountered a PICO-8 version of Celeste, inside Celeste itself. I had heard of it before, but never fully ventured in, and I got a bit intruiged by it.
+While on a failed attempt to 100% [Celeste](https://www.celestegame.com/), I encountered a PICO-8 version of Celeste, inside Celeste itself. I had heard of it before, but never fully ventured in, and I got a bit intrigued by it.
 
 ![https://u.cubeupload.com/namishhhh/maxresdefault.jpg](https://u.cubeupload.com/namishhhh/maxresdefault.jpg)
 
-After digging into PICO-8 a bit more, I could not resist grabbing a copy of my own to experiment with it. Shortly after exploring around the editor, I noticed some things. There were only 16 colors, you had a 8192 token limit on your code and you are limited to only 8x8 pixel art (which, in hindsight should have been obvious from the name). Oh, and no shaders, which is a bummer because they really help enhance the looks of my abysmal pixel art. These are some really tight limitations and things I never even noticed while playing Celeste's PICO-8 version. This really seemed kind of insane to me, because I had been working on my little [top down dungeon crawler](https://x.com/namishh__/status/1978791461174100430) and it is already over 16k lines of code, let alone 8192 tokens.
+After digging into PICO-8 a bit more, I could not resist grabbing a copy of my own to experiment with it. Shortly after exploring around the editor, I noticed some things. There were only 16 colors, you had an 8192 token limit on your code and you are limited to only 8x8 pixel art (which, in hindsight should have been obvious from the name). Oh, and no shaders, which is a bummer because they really help enhance the looks of my abysmal pixel art. These are some really tight limitations and things I never even noticed while playing Celeste's PICO-8 version. This really seemed kind of insane to me, because I had been working on my little [top down dungeon crawler](https://x.com/namishh__/status/1978791461174100430) and it is already over 16k lines of code, let alone 8192 tokens.
 
 <br>
 
-And so, I set out on a small goal for myself, squeezing the most game juice (and a game) out of these limitations. The game I have in mind is kinda like space invaders, kinda like a Undertale-style bullet hell, kinda like Vampire Survivors upgrade system. We will see down the line how much I strayed from the original goal, but this is a very rough progression/game idea I have.
+And so, I set out on a small goal for myself, squeezing the most game juice (and a game) out of these limitations. The game I have in mind is kinda like space invaders, kinda like an Undertale-style bullet hell, kinda like Vampire Survivors upgrade system. We will see down the line how much I strayed from the original goal, but this is a very rough progression/game idea I have.
 
 ## The Player and The Sky(box)
 
 ![https://u.cubeupload.com/namishhhh/Screenshot20251103at.png](https://u.cubeupload.com/namishhhh/Screenshot20251103at.png)
 
-So above was the sprite I was able to draw with the 64 pixels I was given. This, will be my ship. PICO-8 has really easy inbuilt function called `SPR()` to draw a sprite. Drawing and creating a basic character controller, was barely a minute of work.
+So above was the sprite I was able to draw with the 64 pixels I was given. This will be my ship. PICO-8 has really easy inbuilt function called `SPR()` to draw a sprite. Drawing and creating a basic character controller, was barely a minute of work.
 
 ![https://u.cubeupload.com/namishhhh/180Screenshot20251103at.png](https://u.cubeupload.com/namishhhh/180Screenshot20251103at.png)
 
@@ -64,7 +64,7 @@ Let us also sprinkle some "life" into the space where our ship is flying around.
 
 ![https://u.cubeupload.com/namishhhh/dc8Screenshot20251103at.png](https://u.cubeupload.com/namishhhh/dc8Screenshot20251103at.png)
 
-We are actually not "drawing rectangles" here, PICO-8 gives us this built-in function called `PSET` which can be used to set the color of a specific pixel. It is not possilbe to draw `1x1` rectangles using PICO-8's rectangle function
+We are actually not "drawing rectangles" here, PICO-8 gives us this built-in function called `PSET` which can be used to set the color of a specific pixel. It is not possible to draw `1x1` rectangles using PICO-8's rectangle function
 
 Now to add life to these stars, we can apply some techniques: 
 
@@ -92,7 +92,7 @@ for i = 1, #stars do
 end
 ```
 
-And with just these simple tricks, the movement feels far more better. 
+And with just these simple tricks, the movement feels much better. 
 
 <div align="center">
 
@@ -104,7 +104,7 @@ And with just these simple tricks, the movement feels far more better.
 
 ![img](https://u.cubeupload.com/namishhhh/Screenshot20251104at.png)
 
-I plan to have two types of projectiles that can spawn from the player. One will be normal regular projectiles that hits one enemy. Other would be a special big fireball that does damage over an area. So the code to shoot a fireball starts off really simple.
+I plan to have two types of projectiles that can spawn from the player. One will be normal regular projectiles that hit one enemy. Other would be a special big fireball that does damage over an area. So the code to shoot a fireball starts off really simple.
 
 ```lua
 bulls = {}
@@ -142,7 +142,7 @@ To actually move the bullets, in the update function, I just move them up, until
 
 <br>
 
-We have a simple shooter, but it still feels.... stale? A little visual indicator I did was to draw a muzzle flash for every shot. So the way the flash works is that it is a white circle that appears instanteously upon shooting and frame by frame we make it smaller.
+We have a simple shooter, but it still feels.... stale? A little visual indicator I did was to draw a muzzle flash for every shot. So the way the flash works is that it is a white circle that appears instantaneously upon shooting and frame by frame we make it smaller.
 
 ```lua
 -- GLOBALS
@@ -181,7 +181,7 @@ fillp(0b1100011000110001)
 
 I wanted to nerf the primary attack in some way as well. Using cooldowns again felt kind of cheap, so I made it so that you can spam the primary attack but you will have to reload after certain amount of bullets.
 
-This was really easy to code as all I did was check if the magazine is empty and if it is, over the reload time, disable shooting and keeping add bullets to the max capacity of the magazine.
+This was really easy to code as all I did was check if the magazine is empty and if it is, over the reload time, disable shooting and keep adding bullets to the max capacity of the magazine.
 
 <br>
 
@@ -200,7 +200,7 @@ Next, I made these little indicators of how much bullets/mana is left according 
 
 ## Explosions and Particles
 
-In order to prepare for explosions, I just added the most basic enemy and, all it does it stand idle at one place. If a bullet `collides` with the enemy, we decrease it's health by 10. If health is depleted, it despawns. The collision to check between collision of two sprites is fairly easy
+In order to prepare for explosions, I just added the most basic enemy and, all it does is stand idle at one place. If a bullet `collides` with the enemy, we decrease its health by 10. If health is depleted, it despawns. The collision to check between collision of two sprites is fairly easy
 
 ```lua
 function collision(a,b)
@@ -208,7 +208,7 @@ function collision(a,b)
 end
 ```
 
-And basically if the two objects are within 8 pixels of one another (since the sprites are `8x8`), we count it as collision. It’s a rough check that’s fast and simple for pixel games. I also made the enemy flash white, when get hit. PICO-8 gives us a function `PAL` which can be used to replace colors on a sprite. So on bullet collision with enemy, we add a small flash timer for the enemy and replace all the 16 colors with white. Sprite can be brought back to its original form by calling `PAL` without any arguements.
+And basically if the two objects are within 8 pixels of one another (since the sprites are `8x8`), we count it as collision. It's a rough check that's fast and simple for pixel games. I also made the enemy flash white when it gets hit. PICO-8 gives us a function `PAL` which can be used to replace colors on a sprite. So on bullet collision with enemy, we add a small flash timer for the enemy and replace all the 16 colors with white. Sprite can be brought back to its original form by calling `PAL` without any arguments.
 
 ```lua
 if e[i].flash and e[i].flash > 0 then
@@ -219,11 +219,11 @@ if e[i].flash and e[i].flash > 0 then
 end
 ```
 
-To make the game satisfying, it should also feel like our bullets have some impact on the enemy. The enemy should not just despawn when it's health goes to 0. So we need to add more particle effects to the game.
+To make the game satisfying, it should also feel like our bullets have some impact on the enemy. The enemy should not just despawn when its health goes to 0. So we need to add more particle effects to the game.
 
 <br>
 
-The process to make a big boom is fairly easy. When the enemy dies, I spawn a 25 circles of random sizes with random x and y velocities. But I also want to remove the particles from the screen. So I give them a random max_age, and an age timer. If age exceeds, max_age, the particle is removed from the particles table.
+The process to make a big boom is fairly easy. When the enemy dies, I spawn 25 circles of random sizes with random x and y velocities. But I also want to remove the particles from the screen. So I give them a random max_age, and an age timer. If age exceeds, max_age, the particle is removed from the particles table.
 
 <br>
 
@@ -267,7 +267,7 @@ end
 After adding particles to the enemies, it only makes sense to explode and add particles to our ships as well. The first particle effect on our ship is the same explosion we use on the enemy ship when it dies, but on our ship it happens everytime we take damage. This explosion in blue in color and much much smaller.
 
 <br>
-The second and a new effect I did was releasing some smoke particles from our ship when we are low on lifes. It works by adding small grey circles that only go up, but they increase in size as they age and then they despawn when they reach the `max_age`.
+The second and a new effect I did was releasing some smoke particles from our ship when we are low on lives. It works by adding small grey circles that only go up, but they increase in size as they age and then they despawn when they reach the `max_age`.
 
 
 ![img](https://u.cubeupload.com/namishhhh/playerparticles.gif)
@@ -276,7 +276,7 @@ Pretty cool. Another thing I did at this point was to make the special attack, a
 
 <br>
 
-So I modified to be a spreadshot, basically five fireballs firing in an arc infront of the player (using some basic trignometry for which I obviously did not consult AI). 
+So I modified to be a spreadshot, basically five fireballs firing in an arc in front of the player (using some basic trigonometry for which I obviously did not consult AI). 
 
 ![img](https://u.cubeupload.com/namishhhh/newsecondary.gif)
 
@@ -288,13 +288,13 @@ Now is the time to work on the actual roguelike mechanic of our game, for which 
 
 ### Juice Requirement
 
-The straw berry part was easy to code. Spawn a berry where the enemy dies, and just move it downwards, add some horizontal sine wave like movement to it, and if it collides with the player, add to the "juice requirement".
+The strawberry part was easy to code. Spawn a berry where the enemy dies, and just move it downwards, add some horizontal sine wave like movement to it, and if it collides with the player, add to the "juice requirement".
 
 <br>
 
 More interesting part was coming up with the juice requirement and threshold. I did not want to waste tokens of setting up some really comprehensive requirement, instead I wanted a simple one liner formula for getting the requirement at `nth` iteration.
 
-The most easiest would be:
+The easiest would be:
 
 ```lua
 function juice_req(n)
@@ -316,7 +316,7 @@ But most of these games work on exponential level ups. And I allowed claude to c
 return flr(3 * (n ^ 1.6))
 ```
 
-which went steep real quick so recalibrated it to be `n ^ 1.3`. Now the progression systems goes like
+which went steep real quick so I recalibrated it to be `n ^ 1.3`. Now the progression system goes like
 
 ```
 3
@@ -358,7 +358,7 @@ stats = {
 }
 ```
 
-The different in these two stats are that each mult in mults table is used like
+The difference in these two stats are that each mult in mults table is used like
 
 ```lua
 v.x = v * mult.v
@@ -377,7 +377,7 @@ end
 },
 ```
 
-This boon is used to increase the amount of bombs that in the special attack, which is done by the `f` method. The `c` method acts as a check to make it so that the player at maximum can only have 9 bombs. After that the boon stops appearing on the list. The `r` field indicates its rarity and `t` is the text that will be shown on the select menu.
+This boon is used to increase the amount of bombs that are in the special attack, which is done by the `f` method. The `c` method acts as a check to make it so that the player at maximum can only have 9 bombs. After that the boon stops appearing on the list. The `r` field indicates its rarity and `t` is the text that will be shown on the select menu.
 
 <br>
 
@@ -405,7 +405,7 @@ follower = {
 }
 ```
 
-`states` define all the possible states the enemy can be in. The `spawn` and `dead` states are common to all enemies. During the `spawn` state we have the player spawn in some random place outside the screen and have it travel in, so it looks like he is coming to attack us. The `death` state just removes the enemy from the enemies table.
+`states` define all the possible states the enemy can be in. The `spawn` and `dead` states are common to all enemies. During the `spawn` state we have the enemy spawn in some random place outside the screen and have it travel in, so it looks like he is coming to attack us. The `death` state just removes the enemy from the enemies table.
 
 For the follower, we do not need any more state than "active" because all it does is.... follow us. We just use some basic maths to move the enemy towards the player
 
@@ -426,7 +426,7 @@ Inspired from the follower, I added another type of enemy, which charges up and 
 states = {"spawn", "idle", "charging", "charging_up", "dead", "cooldown"}
 ```
 
-I added a really small charging_up state, in which the charcter blinks between two alternate sprites, to indicate that it is gonna fire off soon. For the charging, we just move it in the player's direction for 15 frames, so by then its confirmed that it would have reached the player (real smart). To give it a more realistic feel, I made it's charge speed go up initially and then go down.
+I added a really small charging_up state, in which the character blinks between two alternate sprites, to indicate that it is gonna fire off soon. For the charging, we just move it in the player's direction for 15 frames, so by then it's confirmed that it would have reached the player (real smart). To give it a more realistic feel, I made its charge speed go up initially and then go down.
 
 ```lua
 if enemy.charge_timer > 15 then
@@ -443,7 +443,7 @@ enemy.y += enemy.charge_dy * enemy.charge_speed
 ![img](https://u.cubeupload.com/namishhhh/20251124144129online.gif)
 
 
-Now we need enemies, that can actually shoot back. The most basic version was an enemy that moves to and fro horizontally on randomly selected `y-axis` and shoots bullet downwards, pretty basic. Now I also wanted the same enemy but one that shoots at the player, so I added the ability to pass in custom properties when spawning a player.
+Now we need enemies, that can actually shoot back. The most basic version was an enemy that moves to and fro horizontally on randomly selected `y-axis` and shoots bullet downwards, pretty basic. Now I also wanted the same enemy but one that shoots at the player, so I added the ability to pass in custom properties when spawning an enemy.
 
 <br>
 
@@ -546,4 +546,4 @@ And... with that I have used 8180 of 8192 tokens available. There is so MUCH I w
 
 <br>
 
-This was a really fun project to make, and it took me a lot of time mainly because I had mid sems going on, so I was barely giving this 30 minutes a day, but I really enjoyed it. I know it seems like a really simple game but I really enjoyed the development process and PICO-8 felt similiar to what it felt like when I created my first HTML page six years ago. Until next time, goodbye!
+This was a really fun project to make, and it took me a lot of time mainly because I had mid sems going on, so I was barely giving this 30 minutes a day, but I really enjoyed it. I know it seems like a really simple game but I really enjoyed the development process and PICO-8 felt similar to what it felt like when I created my first HTML page six years ago. Until next time, goodbye!
