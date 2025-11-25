@@ -52,11 +52,11 @@ And so, I set out on a small goal for myself, squeezing the most game juice (and
 
 ![https://u.cubeupload.com/namishhhh/Screenshot20251103at.png](https://u.cubeupload.com/namishhhh/Screenshot20251103at.png)
 
-So above was the sprite I was able to draw with the 64 pixels I was given. This will be my ship. PICO-8 has really easy inbuilt function called `SPR()` to draw a sprite. Drawing and creating a basic character controller, was barely a minute of work.
+So above was the sprite I was able to draw with the 64 pixels I was given. This will be my ship. PICO-8 has really easy to use inbuilt function called `SPR()` to draw a sprite. Drawing and creating a basic character controller was barely a minute of work.
 
 ![https://u.cubeupload.com/namishhhh/180Screenshot20251103at.png](https://u.cubeupload.com/namishhhh/180Screenshot20251103at.png)
 
-But, it looks sad and lonely and it feels boring to move around. So the first fix was to draw the spaceship's exhaust below it. Using my very primitive art skills, I was able to whip out this spritesheet for the exhaust.
+However, it looks sad and lonely and it feels boring to move around. So the first fix was to draw the spaceship's exhaust below it. Using my very primitive art skills, I was able to whip out this spritesheet for the exhaust.
 
 ![https://u.cubeupload.com/namishhhh/27cScreenshot20251103at.png](https://u.cubeupload.com/namishhhh/27cScreenshot20251103at.png)
 
@@ -104,9 +104,10 @@ And with just these simple tricks, the movement feels much better.
 
 ![img](https://u.cubeupload.com/namishhhh/Screenshot20251104at.png)
 
-I plan to have two types of projectiles that can spawn from the player. One will be normal regular projectiles that hit one enemy. Other would be a special big fireball that does damage over an area. So the code to shoot a fireball starts off really simple.
+I plan to have two types of projectiles that can spawn from the player. One will be normal regular projectiles that hit one enemy. Other would be a special big fireball that does damage over an area. 
 
 ```lua
+-- bulls is bullets
 bulls = {}
 if btn(5) then
     -- add item to bulls table
@@ -165,11 +166,11 @@ Then using this, we just draw a white circle of radius `muzzle` just a little ab
 
 ![img](https://u.cubeupload.com/namishhhh/20251104001852online.gif)
 
-Because I want this game to be in like a roguelike fashion, I need to nerf the player in the beginning so he can buy upgrades later. One of the ways I did that was to add a cooldown to the special attack. Now cooldown timer, works like any other timer I have showcased till now. It is also important to give some sort of visual indicator.
+Because I want this game to be in like a roguelike fashion, I need to nerf the player in the beginning so he can buy upgrades later. One of the ways I did that was to add a cooldown to the special attack. The cooldown timer, works like any other timer I have showcased till now. It is also important to give some sort of visual indicator.
 
 <br>
 
-My visual indicator was a huge progress bar spanning across the screen with a white border. I also made the white border flash red and white for a short duration when cooldown ends. To make the progress bar more interesting I tried to replicate a diagonal striped pattern using
+My visual indicator was a huge progress bar spanning across the screen with a white border. I also made the border flash red and white for a short duration when cooldown ends. To make the progress bar more interesting I tried to replicate a diagonal striped pattern using
 
 ```lua
 fillp(0b1100011000110001)
@@ -200,7 +201,7 @@ Next, I made these little indicators of how much bullets/mana is left according 
 
 ## Explosions and Particles
 
-In order to prepare for explosions, I just added the most basic enemy and, all it does is stand idle at one place. If a bullet `collides` with the enemy, we decrease its health by 10. If health is depleted, it despawns. The collision to check between collision of two sprites is fairly easy
+In order to prepare for explosions, I just added the most basic enemy that just stands idle at one place. If a bullet `collides` with the enemy, we decrease its health by 10 and if health is depleted, it despawns. The collision to check between collision of two sprites is fairly easy
 
 ```lua
 function collision(a,b)
@@ -223,13 +224,14 @@ To make the game satisfying, it should also feel like our bullets have some impa
 
 <br>
 
-The process to make a big boom is fairly easy. When the enemy dies, I spawn 25 circles of random sizes with random x and y velocities. But I also want to remove the particles from the screen. So I give them a random max_age, and an age timer. If age exceeds, max_age, the particle is removed from the particles table.
+The process to make a big boom is fairly easy. When the enemy dies, I spawn 25 circles of random sizes with random x and y velocities. But I also want to remove the particles from the screen. So I give them a random `max_age`, and an `age` timer. If `age` exceeds `max_age`, the particle is removed from the particles table.
 
 <br>
 
-This is clearly a start but we can make it better. First, I do not want my particles to just disappear when they reach their max_age, so I changed it so that after they reach their max_age, they slowly decreases their size until they are gone and then I remove them from the table. Then I can also cycle the explosion through a bunch of colors to make it look more like an explosion. I also set the `age` to a random number instead of 0 to prevent the particles from changing colors at the same time.
+This is clearly a start but we can make it better. First, I do not want my particles to just disappear when they reach their `max_age`, so I changed it such that after they reach their `max_age`, they slowly decrease their size until they are gone and then removed from the table. Then I can also cycle the explosion through a bunch of colors to make it look more like an explosion. It starts off yellow, but with age, it becomes more smoky, and gray.
+I also set the `age` to a random number instead of 0 to prevent the particles from changing colors at the same time.
 
-The very last thing I did was to add one big particle before these random particles. This big particle had a very short max_age and was white. This represented the instantaneous "flash" of an explosion.
+The very last thing I did was to add one big particle before these random particles. This big particle had a very short `max_age` and was white, which respresents instantaneous "flash" of an explosion.
 
 <br>
 
@@ -264,10 +266,11 @@ end
 
 ![image](https://u.cubeupload.com/namishhhh/swaves.gif)
 
-After adding particles to the enemies, it only makes sense to explode and add particles to our ships as well. The first particle effect on our ship is the same explosion we use on the enemy ship when it dies, but on our ship it happens everytime we take damage. This explosion in blue in color and much much smaller.
+After adding particles to the enemies, it only makes sense to explode and add particles to our ships as well. The first particle effect on our ship is the same explosion we use on the enemy ship when it dies, but on our ship it happens everytime we take damage. This explosion is blue in color and much more smaller.
 
 <br>
-The second and a new effect I did was releasing some smoke particles from our ship when we are low on lives. It works by adding small grey circles that only go up, but they increase in size as they age and then they despawn when they reach the `max_age`.
+
+The second effect I added was releasing some smoke particles from our ship when we are low on lives. It works by adding small grey circles that only go up, but this time, they increase in size as they age (instead of decreasing like in explosion particles) and then they despawn when they reach the `max_age` .
 
 
 ![img](https://u.cubeupload.com/namishhhh/playerparticles.gif)
@@ -284,7 +287,7 @@ So I modified to be a spreadshot, basically five fireballs firing in an arc in f
 
 ![img](https://u.cubeupload.com/namishhhh/image.jpg)
 
-Now is the time to work on the actual roguelike mechanic of our game, for which I "took inspiration" from [Vampire Survivors](https://store.steampowered.com/app/1794680/Vampire_Survivors/). In that game, when you kill an enemy, it leaves a gem behind and collecting that you can increase your level. After a certain threshold, (when the bar on top fills), you get to select one of the three "boons" to upgrade your player or to upgrade existing weapons. The only change in mine would be that instead of gems, you will collect falling strawberries from dead enemies. The progression system can be broken into two parts.
+Now is the time to work on the actual roguelike mechanic of our game, for which I "took inspiration" from [Vampire Survivors](https://store.steampowered.com/app/1794680/Vampire_Survivors/). In that game, when you kill an enemy, it leaves a gem behind and collecting that will increase your level. After a certain threshold, (when the bar on top fills), you get to select one of the three "boons" to upgrade your player or your spells. The only change in my game would be that instead of gems, you will collect falling strawberries from dead enemies. The progression system can be broken into two parts.
 
 ### Juice Requirement
 
@@ -292,7 +295,7 @@ The strawberry part was easy to code. Spawn a berry where the enemy dies, and ju
 
 <br>
 
-More interesting part was coming up with the juice requirement and threshold. I did not want to waste tokens of setting up some really comprehensive requirement, instead I wanted a simple one liner formula for getting the requirement at `nth` iteration.
+Calculating and coming up with a requirement/threshold mechanism was more interesting. I did not want to waste tokens on setting up some really comprehensive requirement system, instead I wanted a simple one liner formula for getting the requirement at the `nth` iteration.
 
 The easiest would be:
 
@@ -310,7 +313,7 @@ end
 20
 ```
 
-But most of these games work on exponential level ups. And I allowed claude to cook me up this formula
+But most of these games work on exponential level ups. And I allowed Claude to cook me up this formula
 
 ```lua
 return flr(3 * (n ^ 1.6))
@@ -333,7 +336,9 @@ Now to complete the progression system we need to add in
 
 ![img](https://u.cubeupload.com/namishhhh/VampireSurvivorsleve.jpeg)
 
-I want to have two types of boons, upgrades to the player and adding in spawns, like spawning a bomb. For now, I will only implement the first type, I will add spawns later when I have a comprehensive enemy system. 
+
+
+For now, I will only implement the first type, I will add spawns later when I have a comprehensive enemy system. 
 
 So I introduced a bunch of global variables to control each parameter and for the sake of having cleaner code I split them into two tables.
 
@@ -405,7 +410,11 @@ follower = {
 }
 ```
 
-`states` define all the possible states the enemy can be in. The `spawn` and `dead` states are common to all enemies. During the `spawn` state we have the enemy spawn in some random place outside the screen and have it travel in, so it looks like he is coming to attack us. The `death` state just removes the enemy from the enemies table.
+`states` define all the possible states the enemy can be in. 
+
+- The `spawn` and `dead` states are common to all enemies. 
+- During the `spawn` state we have the enemy spawn in some random place outside the screen and make it move inside the playable area, so it looks like it is coming to attack us. 
+- The `death` state just removes the enemy from the enemies table.
 
 For the follower, we do not need any more state than "active" because all it does is.... follow us. We just use some basic maths to move the enemy towards the player
 
@@ -443,7 +452,7 @@ enemy.y += enemy.charge_dy * enemy.charge_speed
 ![img](https://u.cubeupload.com/namishhhh/20251124144129online.gif)
 
 
-Now we need enemies, that can actually shoot back. The most basic version was an enemy that moves to and fro horizontally on randomly selected `y-axis` and shoots bullet downwards, pretty basic. Now I also wanted the same enemy but one that shoots at the player, so I added the ability to pass in custom properties when spawning an enemy.
+Now we need enemies, that can actually shoot back. The most basic version was an enemy that moves to and fro horizontally on a randomly selected `y-axis` and shoots bullet downwards, pretty basic. Now I also wanted the same enemy but one that shoots at the player, so I added the ability to pass in custom properties when spawning an enemy.
 
 <br>
 
@@ -547,3 +556,7 @@ And... with that I have used 8180 of 8192 tokens available. There is so MUCH I w
 <br>
 
 This was a really fun project to make, and it took me a lot of time mainly because I had mid sems going on, so I was barely giving this 30 minutes a day, but I really enjoyed it. I know it seems like a really simple game but I really enjoyed the development process and PICO-8 felt similar to what it felt like when I created my first HTML page six years ago. Until next time, goodbye!
+
+<br>
+
+Also a huge thanks to [@skydotcs](https://x.com/skydotcs) and [@seivarya](https://x.com/seivarya) for proof-reading.
