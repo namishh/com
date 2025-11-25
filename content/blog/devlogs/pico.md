@@ -4,11 +4,36 @@ date: 2 November 2025
 draft: false
 ---
 
+<style>
+  .iframe-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    aspect-ratio: 4 / 3;
+    position: relative;
+  }
+  
+  .iframe-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  
+  @media (min-width: 600px) {
+    .iframe-container {
+      width: 600px;
+      height: 450px;
+    }
+  }
+</style>
+
 <div align="center">
-
-
-<iframe frameborder="0" src="https://itch.io/embed-upload/15635269?color=1e1e23" allowfullscreen="" width="600" height="450"><a href="https://namishh.itch.io/space-8">Play space-8 on itch.io</a></iframe>
-
+  <div class="iframe-container">
+    <iframe frameborder="0" src="https://itch.io/embed-upload/15635269?color=1e1e23" allowfullscreen=""><a href="https://namishh.itch.io/space-8">Play space-8 on itch.io</a></iframe>
+  </div>
 </div>
 
 ## Introduction
