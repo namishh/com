@@ -49,6 +49,18 @@ pub fn get_projects() -> Vec<ProjectCategory> {
             r#type: "Good Projects".to_string(),
             array: vec![
                 Project {
+                    name: "yap".to_string(),
+                    desc: "dialogue backend for löve2d".to_string(),
+                    tech: vec!["lua".to_string(), "love2d".to_string()],
+                    link: None,
+                },
+                Project {
+                    name: "nurture".to_string(),
+                    desc: "ui library for widgets in löve2d".to_string(),
+                    tech: vec!["lua".to_string(), "love2d".to_string()],
+                    link: None,
+                },
+                Project {
                     name: "ascendant".to_string(),
                     desc: "wip 2d club penguin card jutsu style game made with rayilb".to_string(),
                     tech: vec!["zig".to_string(), "raylib".to_string()],
