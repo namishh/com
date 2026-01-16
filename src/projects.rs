@@ -73,7 +73,7 @@ pub fn get_projects() -> Vec<ProjectCategory> {
                     link: None,
                 },
                 Project {
-                    name: "me".to_string(),
+                    name: "com".to_string(),
                     desc: "my own personal blazingly fast website written in rust".to_string(),
                     tech: vec!["rust".to_string(), "actix".to_string()],
                     link: None,
@@ -117,7 +117,7 @@ pub fn get_projects() -> Vec<ProjectCategory> {
                     name: "lockin".to_string(),
                     desc: "24x7 lofi radio plus general productivity website".to_string(),
                     tech: vec!["next".to_string(), "tailwind".to_string()],
-                    link: Some("https://cafe.namishh.me".to_string()),
+                    link: Some("https://lockin-cafe.vercel.app/".to_string()),
                 },
                 Project {
                     name: "lovbyte".to_string(),

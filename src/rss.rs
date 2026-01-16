@@ -36,7 +36,7 @@ pub async fn rss_feed(
         }
     });
     
-    let base_url = "https://namishh.me";
+    let base_url = "https://namishh.com";
     
     let mut channel = ChannelBuilder::default()
         .title("namishh")
