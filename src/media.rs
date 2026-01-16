@@ -24,7 +24,7 @@ pub fn get_media() -> Vec<MediaItem> {
             name: "The Beginning Of Infinity".to_string(),
             category: "book".to_string(),
             tags: Some(vec!["currently reading".to_string()]),
-            image: "/static/images/boi.jpeg".to_string(),
+            image: "https://u.cubeupload.com/namishhhh/thebeginningofinfini.jpeg".to_string(),
             desc: None,
             score: 10.0,
         },
