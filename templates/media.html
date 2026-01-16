@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}media{% endblock title %}
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+{% block meta %}
+    <meta property="og:title" content="nam's media" />
+    <meta property="og:url" content="https://namishh.me/media" />
+    <meta property="og:image" content="/og/web/media" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:type" content="article" />
+    <meta property="og:description" content="media i consume and review">
+
+    <meta property="twitter:description" content="media i consume and review">
+    <meta name="twitter:title" content="nam's media">
+    <meta property="twitter:image" content="/og/web/media" />
+{% endblock meta %}
+{% block content %}
+    <div id="media-container">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold mb-2">media log</h1>
+            <p class="normal-text text-sm">stuff i've watched, read, and consumed</p>
+        </div>
+
+        {% if media | length == 0 %}
+            <p class="normal-text">no media reviews yet...</p>
+        {% else %}
+            <div class="flex flex-col gap-4">
+                {% for item in media %}
+                    <div class="media-card border border-neutral-300 dark:border-neutral-800 flex flex-col md:flex-row overflow-hidden">
+                        <div class="w-full md:w-40 h-56 md:h-auto flex-shrink-0 overflow-hidden">
+                            <img src="{{ item.image }}" alt="{{ item.name }}" class="w-full h-full object-cover" />
+                        </div>
+                        <div class="p-4 flex flex-col flex-grow">
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <h3 class="font-bold text-lg dark:text-white text-neutral-800">{{ item.name }}</h3>
+                                <span class="flex-shrink-0 bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 font-bold text-sm px-2 py-1">
+                                    {{ item.score | format_score }}/10
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <span class="font-mono text-neutral-100 dark:text-neutral-900 bg-neutral-700 dark:bg-neutral-300 text-xs px-2 py-1">{{ item.category }}</span>
+                                {% if item.tags %}
+                                    {% for tag in item.tags %}
+                                        <span class="font-mono dark:text-neutral-200 text-neutral-600 bg-neutral-200 dark:bg-neutral-800 text-xs px-2 py-1">{{ tag }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            {% if item.desc %}
+                                <p class="normal-text text-sm">{{ item.desc }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %}
