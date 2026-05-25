@@ -4,14 +4,14 @@ head %} {{ super() }}
 {% endblock head %} {% block meta %}
 <meta property="og:title" content="nam's site" />
 <meta property="og:url" content="https://namishh.me/" />
-<meta property="og:image" content="/og/web/index" />
+<meta property="og:image" content="/og/web/index.png" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta property="og:type" content="article" />
 <meta property="og:description" content="personal garden and website" />
 
 <meta property="twitter:description" content="personal garden and website" />
 <meta name="twitter:title" content="nam's site" />
-<meta property="twitter:image" content="/og/web/index" />
+<meta property="twitter:image" content="/og/web/index.png" />
 {% endblock meta %} {% block content %}
 <p class="text-n normal-text">
     hey there 👋 ! i like <span class="underlined">nixos</span>,
@@ -31,7 +31,7 @@ head %} {{ super() }}
 </p>
 
 <div class="flex gap-5 mt-4">
-    <a href="/resume" target="_blank" class="underlined"
+    <a href="/static/pdfs/resume.pdf" target="_blank" class="underlined"
         ><i class="ph-thin ph-file"></i> resume</a
     >
     <a href="https://github.com/namishh" target="_blank" class="underlined"

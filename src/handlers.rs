@@ -112,7 +112,13 @@ pub async fn view_markdown(
     path: web::Path<(String,)>,
     req : HttpRequest
 ) -> Result<HttpResponse, actix_web::Error> {
-    let path_param = &path.0;
+    let owned_path;
+    let path_param = if let Some(stripped) = path.0.strip_suffix(".png") {
+        owned_path = stripped.to_string();
+        &owned_path
+    } else {
+        &path.0
+    };
     let base_path = PathBuf::from("content");
     let mut file_path = base_path.join(path_param);
 
@@ -312,7 +318,13 @@ pub async fn generate_web_og(
     app_state: web::Data<AppState>,
     path: web::Path<(String,)>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let path_segment = &path.0;
+    let owned_path;
+    let path_segment = if let Some(stripped) = path.0.strip_suffix(".png") {
+        owned_path = stripped.to_string();
+        &owned_path
+    } else {
+        &path.0
+    };
     let (title, subtitle) = match path_segment.as_str() {
         "index" => ("namishh", "personal website and garden"),
         "search" => ("namishh", "search stuff around here"),

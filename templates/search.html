@@ -10,11 +10,11 @@
 {% block meta %}
 <meta property="og:title" content="{% if query %}search - {{ query }}{% else %}search{% endif %} | namishh">
 <meta property="og:description" content="Search through content on namishh's website">
-<meta property="og:image" content="/og/web/search">
+<meta property="og:image" content="/og/web/search.png">
 <meta property="og:url" content="https://namishh.me/search">
 <meta property="twitter:title" content="{% if query %}search - {{ query }}{% else %}search{% endif %} | namishh">
 <meta property="twitter:description" content="Search through content on namishh's website">
-<meta property="twitter:image" content="/og/web/search">
+<meta property="twitter:image" content="/og/web/search.png">
 <meta property="twitter:card" content="summary_large_image">
 {% endblock meta %}
 
@@ -24,7 +24,7 @@
     
     <form action="/search" method="get" class="mb-4">
         <div class="flex gap-2">
-            <input type="text" name="q" value="{{ query | default(value='') }}"
+            <input id="search-input" type="text" name="q" value="{{ query | default(value='') }}"
                 class="flex-grow p-2 border-[1px] w-5/6 focus:outline-none outline-none border-neutral-300 dark:border-neutral-600"
                 placeholder="rust...">
             <button type="submit"
@@ -37,6 +37,7 @@
         </div>
     </form>
 
+    <div id="search-results">
     {% if has_query %}
         {% if results and results | length > 0 %}
             <div class="my-4">
@@ -66,5 +67,72 @@
             <p>Enter a search term above to find content on this site.</p>
         </div>
     {% endif %}
+    </div>
 </div>
+<script>
+    (async function () {
+        const query = new URLSearchParams(window.location.search).get("q")?.trim();
+        if (!query) return;
+
+        const input = document.getElementById("search-input");
+        const container = document.getElementById("search-results");
+        input.value = query;
+        container.replaceChildren();
+
+        const response = await fetch("/search-index.json");
+        const documents = await response.json();
+        const lowerQuery = query.toLowerCase();
+        const results = documents
+            .map((document) => {
+                const lowerContent = document.content.toLowerCase();
+                const index = lowerContent.indexOf(lowerQuery);
+                if (index === -1) return null;
+                const start = Math.max(0, index - 80);
+                const end = Math.min(document.content.length, index + query.length + 120);
+                return {
+                    title: document.title,
+                    url: document.url,
+                    context: document.content.slice(start, end).trim(),
+                };
+            })
+            .filter(Boolean);
+
+        if (results.length === 0) {
+            const empty = document.createElement("div");
+            empty.className = "p-4 bg-neutral-200 text-sm font-mono text-neutral-600 dark:text-neutral-400 dark:bg-neutral-800 my-4";
+            empty.textContent = `No results found for "${query}".`;
+            container.appendChild(empty);
+            return;
+        }
+
+        const count = document.createElement("p");
+        count.className = "text-neutral-600 dark:text-neutral-400 mb-4";
+        count.textContent = `Found results in ${results.length} page${results.length === 1 ? "" : "s"} for "${query}"`;
+        container.appendChild(count);
+
+        for (const result of results) {
+            const item = document.createElement("div");
+            item.className = "mb-6";
+
+            const title = document.createElement("h3");
+            title.className = "font-semibold text-normal mb-2";
+            const titleLink = document.createElement("a");
+            titleLink.href = `/${result.url}`;
+            titleLink.textContent = result.title;
+            title.appendChild(titleLink);
+
+            const contextLink = document.createElement("a");
+            contextLink.href = `/${result.url}`;
+            contextLink.className = "mt-2 p-2 border-[1px] hover:bg-neutral-100 block dark:hover:bg-neutral-800 border-neutral-400 dark:border-neutral-600 mb-2";
+            const context = document.createElement("p");
+            context.className = "whitespace-pre-line text-sm text-neutral-700 dark:text-neutral-300";
+            context.textContent = result.context;
+            contextLink.appendChild(context);
+
+            item.appendChild(title);
+            item.appendChild(contextLink);
+            container.appendChild(item);
+        }
+    })();
+</script>
 {% endblock content %}
