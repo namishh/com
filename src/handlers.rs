@@ -112,7 +112,13 @@ pub async fn view_markdown(
     path: web::Path<(String,)>,
     req : HttpRequest
 ) -> Result<HttpResponse, actix_web::Error> {
-    let path_param = &path.0;
+    let owned_path;
+    let path_param = if let Some(stripped) = path.0.strip_suffix(".png") {
+        owned_path = stripped.to_string();
+        &owned_path
+    } else {
+        &path.0
+    };
     let base_path = PathBuf::from("content");
     let mut file_path = base_path.join(path_param);
 
@@ -216,7 +222,13 @@ pub async fn generate_tweet_image(
 ) -> Result<HttpResponse, actix_web::Error> {
     let title_font = &*app_state.title_font;
     let path_font: &ab_glyph::FontRef<'_> = &*app_state.path_font;
-    let id = &path.0;
+    let owned_id;
+    let id = if let Some(stripped) = path.0.strip_suffix(".png") {
+        owned_id = stripped.to_string();
+        &owned_id
+    } else {
+        &path.0
+    };
 
     let image_bytes = generate_tweet(id, title_font, path_font).await.expect("Failed to generate tweet image");
 
@@ -312,7 +324,13 @@ pub async fn generate_web_og(
     app_state: web::Data<AppState>,
     path: web::Path<(String,)>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let path_segment = &path.0;
+    let owned_path;
+    let path_segment = if let Some(stripped) = path.0.strip_suffix(".png") {
+        owned_path = stripped.to_string();
+        &owned_path
+    } else {
+        &path.0
+    };
     let (title, subtitle) = match path_segment.as_str() {
         "index" => ("namishh", "personal website and garden"),
         "search" => ("namishh", "search stuff around here"),
