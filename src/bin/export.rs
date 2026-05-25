@@ -1,9 +1,12 @@
 use ab_glyph::FontRef;
 use chrono::{DateTime, NaiveDate, Utc};
+use futures_util::FutureExt;
 use serde::Serialize;
 use serde_json::Value as JsonValue;
 use std::cmp::Ordering;
+use std::collections::HashSet;
 use std::fs;
+use std::panic::AssertUnwindSafe;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use tera::Context;
@@ -20,6 +23,8 @@ mod media;
 mod projects;
 #[path = "../templates.rs"]
 mod templates;
+#[path = "../tweet.rs"]
+mod tweet;
 
 #[derive(Serialize)]
 struct SearchDocument {
@@ -113,6 +118,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut search_documents = Vec::new();
     let mut content_items = Vec::new();
+    let mut tweet_ids = HashSet::new();
     render_content_dir(
         Path::new("content"),
         Path::new("content"),
@@ -124,11 +130,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &path_font,
         &mut search_documents,
         &mut content_items,
+        &mut tweet_ids,
     )?;
 
     write_file(&dist.join("search-index.json"), &serde_json::to_string(&search_documents)?)?;
     write_file(&dist.join("rss.xml"), &render_rss(content_items))?;
     generate_web_og_images(dist, &title_font, &path_font)?;
+    actix_rt::System::new().block_on(generate_tweet_images(dist, &title_font, &path_font, &tweet_ids))?;
 
     println!("Exported static site to dist/");
     Ok(())
@@ -184,6 +192,7 @@ fn render_content_dir(
     path_font: &FontRef,
     search_documents: &mut Vec<SearchDocument>,
     content_items: &mut Vec<ContentItem>,
+    tweet_ids: &mut HashSet<String>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     for entry in fs::read_dir(current)? {
         let entry = entry?;
@@ -194,9 +203,33 @@ fn render_content_dir(
         }
 
         if path.is_dir() {
-            render_content_dir(base, &path, dist, tera, file_tree, highlighter, title_font, path_font, search_documents, content_items)?;
+            render_content_dir(
+                base,
+                &path,
+                dist,
+                tera,
+                file_tree,
+                highlighter,
+                title_font,
+                path_font,
+                search_documents,
+                content_items,
+                tweet_ids,
+            )?;
         } else if path.extension().is_some_and(|ext| ext == "md") {
-            render_markdown_file(base, &path, dist, tera, file_tree, highlighter, title_font, path_font, search_documents, content_items)?;
+            render_markdown_file(
+                base,
+                &path,
+                dist,
+                tera,
+                file_tree,
+                highlighter,
+                title_font,
+                path_font,
+                search_documents,
+                content_items,
+                tweet_ids,
+            )?;
         }
     }
     Ok(())
@@ -213,10 +246,12 @@ fn render_markdown_file(
     path_font: &FontRef,
     search_documents: &mut Vec<SearchDocument>,
     content_items: &mut Vec<ContentItem>,
+    tweet_ids: &mut HashSet<String>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let raw = fs::read_to_string(file_path)?;
     let (frontmatter, body) = markdown::extract_frontmatter(&raw);
-    let (content_html, headings) = markdown::markdown_to_html(body, highlighter);
+    let body = rewrite_tweet_urls(body, tweet_ids);
+    let (content_html, headings) = markdown::markdown_to_html(&body, highlighter);
     let rel_path = file_path.strip_prefix(base)?.with_extension("");
     let url = rel_path.to_string_lossy().replace('\\', "/");
 
@@ -261,7 +296,7 @@ fn render_markdown_file(
         search_documents.push(SearchDocument {
             title: title.clone(),
             url: url.clone(),
-            content: body.to_string(),
+            content: body,
         });
         content_items.push(ContentItem {
             title: title.clone(),
@@ -278,6 +313,39 @@ fn render_markdown_file(
         .unwrap_or_default();
     let image = image_generator::generate_content_og_image(&title, &dir_path, title_font, path_font, &None);
     write_bytes(&dist.join("og/content").join(format!("{url}.png")), &image)?;
+
+    Ok(())
+}
+
+fn rewrite_tweet_urls(body: &str, tweet_ids: &mut HashSet<String>) -> String {
+    let re = regex::Regex::new(r"/tweet/([0-9]+)(\.png)?").unwrap();
+    re.replace_all(body, |captures: &regex::Captures| {
+        let id = captures.get(1).unwrap().as_str();
+        tweet_ids.insert(id.to_string());
+        format!("/tweet/{id}.png")
+    })
+    .into_owned()
+}
+
+async fn generate_tweet_images(
+    dist: &Path,
+    title_font: &FontRef<'_>,
+    path_font: &FontRef<'_>,
+    tweet_ids: &HashSet<String>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut tweet_ids = tweet_ids.iter().collect::<Vec<_>>();
+    tweet_ids.sort();
+
+    for id in tweet_ids {
+        let result = AssertUnwindSafe(tweet::generate_tweet(id, title_font, path_font))
+            .catch_unwind()
+            .await;
+        match result {
+            Ok(Ok(image)) => write_bytes(&dist.join("tweet").join(format!("{id}.png")), &image)?,
+            Ok(Err(error)) => eprintln!("Failed to generate tweet {id}: {error}"),
+            Err(_) => eprintln!("Failed to generate tweet {id}: generator panicked"),
+        }
+    }
 
     Ok(())
 }

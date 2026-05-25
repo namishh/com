@@ -222,7 +222,13 @@ pub async fn generate_tweet_image(
 ) -> Result<HttpResponse, actix_web::Error> {
     let title_font = &*app_state.title_font;
     let path_font: &ab_glyph::FontRef<'_> = &*app_state.path_font;
-    let id = &path.0;
+    let owned_id;
+    let id = if let Some(stripped) = path.0.strip_suffix(".png") {
+        owned_id = stripped.to_string();
+        &owned_id
+    } else {
+        &path.0
+    };
 
     let image_bytes = generate_tweet(id, title_font, path_font).await.expect("Failed to generate tweet image");
 

@@ -666,7 +666,7 @@ rec {
 }
 ```
 
-<img src="/static/wavescrot.png" />
+<img src="/static/images/wavescrot.png" />
 
 This is how the theme looks on awesome
 
@@ -1232,7 +1232,7 @@ And in the end:
     ];
 ```
 
-<img src="/wezzsh.png"/>
+<img src="/static/images/wezzsh.png"/>
 
 ### Music
 
