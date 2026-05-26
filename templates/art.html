@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}projects{% endblock title %}
+{% block head %}
+    {{ super() }}
+    <script src="/static/gol.js" defer></script>
+{% endblock head %}
+{% block meta %}
+    <meta property="og:title" content="nam's art" />
+    <meta property="og:url" content="https://namishh.me/art" />
+    <meta property="og:image" content="/og/web/stuff.png" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:type" content="article" />
+    <meta property="og:description" content="all the art that i have made">
+
+
+    <meta property="twitter:description" content="all the art that i have made">
+    <meta name="twitter:title" content="nam's art">
+    <meta property="twitter:image" content="/og/web/stuff.png" />
+{% endblock meta %}
+{% block content %}
+
+<h2 class="mb-4 text-normal">drawing since 8th feb 2026. digitally since 21st may 2026</h2>
+
+<div class="flex flex-col gap-4">
+<img src="/static/images/0001-gestures.png" alt="">
+<img src="/static/images/0002-gestures-2.png" alt="">
+<img src="/static/images/0003-anime-faces.png" alt="">
+<img src="/static/images/0004-umas.png" alt="">
+</div>
+
+{% endblock content %}
+
