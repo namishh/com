@@ -1,37 +1,31 @@
-use pulldown_cmark::{Parser, Options, html, Tag, TagEnd, CodeBlockKind, Event};
-use inkjet::{Highlighter, Language, formatter};
-use std::collections::{HashMap, HashSet};
-use lazy_static::lazy_static;
-use regex::Regex;
 use htmlescape;
-use std::sync::Mutex;
+use inkjet::{Highlighter, Language, formatter};
+use once_cell::sync::Lazy;
+use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag, TagEnd, html};
+use regex::Regex;
 use serde_json::Value as JsonValue;
+use std::collections::HashSet;
+use std::sync::Mutex;
 
-lazy_static! {
-   pub static ref LANGUAGE_MAP: HashMap<&'static str, Language> = {
-        let mut m = HashMap::new();
-        m.insert("rust", Language::Rust);
-        m.insert("javascript", Language::Javascript);
-        m.insert("js", Language::Javascript);
-        m.insert("typescript", Language::Typescript);
-        m.insert("ts", Language::Typescript);
-        m.insert("python", Language::Python);
-        m.insert("py", Language::Python);
-        m.insert("css", Language::Css);
-        m.insert("html", Language::Html);
-        m.insert("lua", Language::Lua);
-        m.insert("jsx", Language::Jsx);
-        m.insert("tsx", Language::Tsx);
-        m.insert("zig", Language::Zig);
-        m.insert("nix", Language::Nix);
-        m.insert("glsl", Language::Glsl);
-        m
-    };
-   pub static ref FRONTMATTER_REGEX: Regex = Regex::new(r"(?s)^-{3,}\s*\n(.*?)\n-{3,}\s*\n(.*)").unwrap();
-}
+pub static FRONTMATTER_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"(?s)^-{3,}\s*\n(.*?)\n-{3,}\s*\n(.*)").unwrap());
 
 fn get_inkjet_language(lang_str: &str) -> Option<Language> {
-    LANGUAGE_MAP.get(lang_str.to_lowercase().as_str()).cloned()
+    match lang_str.to_lowercase().as_str() {
+        "rust" => Some(Language::Rust),
+        "javascript" | "js" => Some(Language::Javascript),
+        "typescript" | "ts" => Some(Language::Typescript),
+        "python" | "py" => Some(Language::Python),
+        "css" => Some(Language::Css),
+        "html" => Some(Language::Html),
+        "lua" => Some(Language::Lua),
+        "jsx" => Some(Language::Jsx),
+        "tsx" => Some(Language::Tsx),
+        "zig" => Some(Language::Zig),
+        "nix" => Some(Language::Nix),
+        "glsl" => Some(Language::Glsl),
+        _ => None,
+    }
 }
 
 fn extract_language_and_filename(info_string: &str) -> (Option<String>, Option<String>) {
@@ -41,15 +35,17 @@ fn extract_language_and_filename(info_string: &str) -> (Option<String>, Option<S
     } else {
         None
     };
-    let filename = parts.iter()
+    let filename = parts
+        .iter()
         .find(|part| part.starts_with("title="))
         .and_then(|part| {
             let eq_pos = part.find('=').unwrap_or(0);
             if eq_pos < part.len() - 1 {
                 let value = &part[eq_pos + 1..];
-                if (value.starts_with('"') && value.ends_with('"')) || 
-                   (value.starts_with('\'') && value.ends_with('\'')) {
-                    Some(value[1..value.len()-1].to_string())
+                if (value.starts_with('"') && value.ends_with('"'))
+                    || (value.starts_with('\'') && value.ends_with('\''))
+                {
+                    Some(value[1..value.len() - 1].to_string())
                 } else {
                     Some(value.to_string())
                 }
@@ -65,11 +61,9 @@ fn parse_highlighting_info(info_string: &str) -> (HashSet<usize>, HashSet<usize>
     let mut add_lines = HashSet::new();
     let mut h_lines = HashSet::new();
 
-    lazy_static! {
-        static ref DEL_RE: Regex = Regex::new(r"del=\{([^}]+)\}").unwrap();
-        static ref ADD_RE: Regex = Regex::new(r"add=\{([^}]+)\}").unwrap();
-        static ref H_RE: Regex = Regex::new(r"\{([^}]+)\}").unwrap();
-    }
+    static DEL_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"del=\{([^}]+)\}").unwrap());
+    static ADD_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"add=\{([^}]+)\}").unwrap());
+    static H_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{([^}]+)\}").unwrap());
 
     let parse_ranges = |range_str: &str| -> HashSet<usize> {
         let mut result = HashSet::new();
@@ -78,7 +72,10 @@ fn parse_highlighting_info(info_string: &str) -> (HashSet<usize>, HashSet<usize>
             if part.contains('-') {
                 let range: Vec<&str> = part.split('-').collect();
                 if range.len() == 2 {
-                    if let (Ok(start), Ok(end)) = (range[0].trim().parse::<usize>(), range[1].trim().parse::<usize>()) {
+                    if let (Ok(start), Ok(end)) = (
+                        range[0].trim().parse::<usize>(),
+                        range[1].trim().parse::<usize>(),
+                    ) {
                         for i in start..=end {
                             result.insert(i);
                         }
@@ -112,7 +109,10 @@ fn parse_highlighting_info(info_string: &str) -> (HashSet<usize>, HashSet<usize>
     (del_lines, add_lines, h_lines)
 }
 
-pub fn markdown_to_html(content: &str, highlighter: &Mutex<Highlighter>) -> (String, Vec<(u8, String, String)>) {
+pub fn markdown_to_html(
+    content: &str,
+    highlighter: &Mutex<Highlighter>,
+) -> (String, Vec<(u8, String, String)>) {
     let mut options = Options::empty();
     options.insert(Options::ENABLE_STRIKETHROUGH);
     options.insert(Options::ENABLE_MATH);
@@ -124,7 +124,7 @@ pub fn markdown_to_html(content: &str, highlighter: &Mutex<Highlighter>) -> (Str
     let mut current_filename = None;
     let mut current_heading: Option<(u8, Vec<Event>)> = None;
     let mut headings = Vec::new();
-    let mut current_highlighting: (HashSet<usize>, HashSet<usize>, HashSet<usize>) = 
+    let mut current_highlighting: (HashSet<usize>, HashSet<usize>, HashSet<usize>) =
         (HashSet::new(), HashSet::new(), HashSet::new());
     let mut events = Vec::new();
 
@@ -151,19 +151,23 @@ pub fn markdown_to_html(content: &str, highlighter: &Mutex<Highlighter>) -> (Str
                     htmlescape::encode_minimal(&text)
                 );
                 events.push(Event::Html(math_html.into()));
-            },
+            }
             Event::InlineMath(text) => {
                 let math_html = format!(
                     r#"<span class="math math-inline">\({}\)</span>"#,
                     htmlescape::encode_minimal(&text)
                 );
                 events.push(Event::Html(math_html.into()));
-            },
+            }
             Event::End(TagEnd::CodeBlock) if in_code_block => {
                 in_code_block = false;
                 let highlighted_html = if let Some(lang_str) = current_language.as_ref() {
                     if let Some(inkjet_lang) = get_inkjet_language(lang_str) {
-                        match highlighter.lock().unwrap().highlight_to_string(inkjet_lang, &formatter::Html, &code_content) {
+                        match highlighter.lock().unwrap().highlight_to_string(
+                            inkjet_lang,
+                            &formatter::Html,
+                            &code_content,
+                        ) {
                             Ok(html) => html,
                             Err(e) => {
                                 eprintln!("Error highlighting code: {}", e);
@@ -178,7 +182,11 @@ pub fn markdown_to_html(content: &str, highlighter: &Mutex<Highlighter>) -> (Str
                 };
                 let lines: Vec<&str> = highlighted_html.lines().collect();
                 let total_lines = lines.len();
-                let width_needed = if total_lines > 0 { total_lines.to_string().len() } else { 1 };
+                let width_needed = if total_lines > 0 {
+                    total_lines.to_string().len()
+                } else {
+                    1
+                };
                 let (del_lines, add_lines, highlight_lines) = &current_highlighting;
                 let line_numbered_html = lines
                     .iter()
@@ -194,8 +202,8 @@ pub fn markdown_to_html(content: &str, highlighter: &Mutex<Highlighter>) -> (Str
                             line_class = " class=\"highlight\"".to_string();
                         }
                         format!(
-                            "<span{line_class}><span class=\"line-number\">{:0width$}</span><span class=\"code-line\">{}</span></span>", 
-                            line_num, 
+                            "<span{line_class}><span class=\"line-number\">{:0width$}</span><span class=\"code-line\">{}</span></span>",
+                            line_num,
                             line,
                             width = width_needed,
                             line_class = line_class
@@ -206,8 +214,7 @@ pub fn markdown_to_html(content: &str, highlighter: &Mutex<Highlighter>) -> (Str
                 let code_html = if let Some(filename) = current_filename.as_ref() {
                     format!(
                         r#"<div class="code-block"><div class="code-header flex items-center justify-end"><span class="code-filename">{}</span><button class="copy-button" onclick="copyCode(this)"><i class="ph ph-copy"></i></button></div><pre><code>{}</code></pre></div>"#,
-                        filename,
-                        line_numbered_html
+                        filename, line_numbered_html
                     )
                 } else {
                     format!(
@@ -245,7 +252,8 @@ pub fn markdown_to_html(content: &str, highlighter: &Mutex<Highlighter>) -> (Str
                     headings.push((level, text_content.clone(), slug.clone()));
                     let mut inner_html = String::new();
                     html::push_html(&mut inner_html, inner_events.into_iter());
-                    let heading_html = format!("<h{} id=\"{}\">{}</h{}>", level, slug, inner_html, level);
+                    let heading_html =
+                        format!("<h{} id=\"{}\">{}</h{}>", level, slug, inner_html, level);
                     events.push(Event::Html(heading_html.into()));
                 }
             }

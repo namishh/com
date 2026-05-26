@@ -1,6 +1,7 @@
 use ab_glyph::FontRef;
 use chrono::{DateTime, NaiveDate, Utc};
 use futures_util::FutureExt;
+use image::DynamicImage;
 use serde::Serialize;
 use serde_json::Value as JsonValue;
 use std::cmp::Ordering;
@@ -109,10 +110,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     copy_dir(Path::new("static"), &dist.join("static"))?;
 
     let tera = templates::init_tera();
-    let file_tree = Arc::new(file_tree::build_file_tree(Path::new("content"), Path::new("")));
+    let file_tree = Arc::new(file_tree::build_file_tree(
+        Path::new("content"),
+        Path::new(""),
+    ));
     let highlighter = Mutex::new(inkjet::Highlighter::new());
-    let title_font = FontRef::try_from_slice(include_bytes!("../../static/_priv/fonts/InterE.ttf"))?;
+    let title_font =
+        FontRef::try_from_slice(include_bytes!("../../static/_priv/fonts/InterE.ttf"))?;
     let path_font = FontRef::try_from_slice(include_bytes!("../../static/_priv/fonts/InterM.ttf"))?;
+    let avatar = actix_rt::System::new().block_on(image_generator::load_avatar());
 
     render_pages(dist, &tera, &file_tree)?;
 
@@ -128,15 +134,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &highlighter,
         &title_font,
         &path_font,
+        &avatar,
         &mut search_documents,
         &mut content_items,
         &mut tweet_ids,
     )?;
 
-    write_file(&dist.join("search-index.json"), &serde_json::to_string(&search_documents)?)?;
+    write_file(
+        &dist.join("search-index.json"),
+        &serde_json::to_string(&search_documents)?,
+    )?;
     write_file(&dist.join("rss.xml"), &render_rss(content_items))?;
-    generate_web_og_images(dist, &title_font, &path_font)?;
-    actix_rt::System::new().block_on(generate_tweet_images(dist, &title_font, &path_font, &tweet_ids))?;
+    generate_web_og_images(dist, &title_font, &path_font, &avatar)?;
+    actix_rt::System::new().block_on(generate_tweet_images(
+        dist,
+        &title_font,
+        &path_font,
+        &tweet_ids,
+    ))?;
 
     println!("Exported static site to dist/");
     Ok(())
@@ -170,8 +185,7 @@ fn render_web_page(
     file_tree: &Arc<Vec<file_tree::FileNode>>,
     page: &Page,
     output: &Path,
-) -> Result<(), Box<dyn std::error::Error>>
-{
+) -> Result<(), Box<dyn std::error::Error>> {
     let mut context = Context::new();
     context.insert("file_tree", &file_tree::get_file_tree(file_tree));
     context.insert("path", page.route);
@@ -190,6 +204,7 @@ fn render_content_dir(
     highlighter: &Mutex<inkjet::Highlighter>,
     title_font: &FontRef,
     path_font: &FontRef,
+    avatar: &Option<DynamicImage>,
     search_documents: &mut Vec<SearchDocument>,
     content_items: &mut Vec<ContentItem>,
     tweet_ids: &mut HashSet<String>,
@@ -197,7 +212,10 @@ fn render_content_dir(
     for entry in fs::read_dir(current)? {
         let entry = entry?;
         let path = entry.path();
-        let file_name = path.file_name().and_then(|name| name.to_str()).unwrap_or_default();
+        let file_name = path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or_default();
         if file_name.starts_with('.') {
             continue;
         }
@@ -212,6 +230,7 @@ fn render_content_dir(
                 highlighter,
                 title_font,
                 path_font,
+                avatar,
                 search_documents,
                 content_items,
                 tweet_ids,
@@ -226,6 +245,7 @@ fn render_content_dir(
                 highlighter,
                 title_font,
                 path_font,
+                avatar,
                 search_documents,
                 content_items,
                 tweet_ids,
@@ -244,6 +264,7 @@ fn render_markdown_file(
     highlighter: &Mutex<inkjet::Highlighter>,
     title_font: &FontRef,
     path_font: &FontRef,
+    avatar: &Option<DynamicImage>,
     search_documents: &mut Vec<SearchDocument>,
     content_items: &mut Vec<ContentItem>,
     tweet_ids: &mut HashSet<String>,
@@ -256,7 +277,11 @@ fn render_markdown_file(
     let url = rel_path.to_string_lossy().replace('\\', "/");
 
     let mut context = Context::new();
-    let mut title = file_path.file_stem().unwrap_or_default().to_string_lossy().to_string();
+    let mut title = file_path
+        .file_stem()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .to_string();
     let mut draft = false;
     let mut description = None;
     let mut date = None;
@@ -276,7 +301,10 @@ fn render_markdown_file(
             }
             if key == "date" {
                 date = value.as_str().and_then(parse_date).map(|date| {
-                    DateTime::<Utc>::from_naive_utc_and_offset(date.and_hms_opt(0, 0, 0).unwrap(), Utc)
+                    DateTime::<Utc>::from_naive_utc_and_offset(
+                        date.and_hms_opt(0, 0, 0).unwrap(),
+                        Utc,
+                    )
                 });
             }
             context.insert(key, &value);
@@ -290,7 +318,10 @@ fn render_markdown_file(
     context.insert("file_path", &url);
     context.insert("path", &format!("/{url}"));
 
-    write_file(&dist.join(&rel_path).join("index.html"), &tera.render("view.html", &context)?)?;
+    write_file(
+        &dist.join(&rel_path).join("index.html"),
+        &tera.render("view.html", &context)?,
+    )?;
 
     if !draft {
         search_documents.push(SearchDocument {
@@ -311,7 +342,9 @@ fn render_markdown_file(
         .and_then(|path| path.strip_prefix(base).ok())
         .map(|path| path.to_string_lossy().to_string())
         .unwrap_or_default();
-    let image = image_generator::generate_content_og_image(&title, &dir_path, title_font, path_font, &None);
+    let image = image_generator::generate_content_og_image(
+        &title, &dir_path, title_font, path_font, avatar,
+    );
     write_bytes(&dist.join("og/content").join(format!("{url}.png")), &image)?;
 
     Ok(())
@@ -350,12 +383,23 @@ async fn generate_tweet_images(
     Ok(())
 }
 
-fn generate_web_og_images(dist: &Path, title_font: &FontRef, path_font: &FontRef) -> Result<(), Box<dyn std::error::Error>> {
+fn generate_web_og_images(
+    dist: &Path,
+    title_font: &FontRef,
+    path_font: &FontRef,
+    avatar: &Option<DynamicImage>,
+) -> Result<(), Box<dyn std::error::Error>> {
     for page in PAGES {
         let Some(path) = page.og_path else {
             continue;
         };
-        let image = image_generator::generate_web_og_image(page.og_title, page.og_subtitle, title_font, path_font, &None);
+        let image = image_generator::generate_web_og_image(
+            page.og_title,
+            page.og_subtitle,
+            title_font,
+            path_font,
+            avatar,
+        );
         write_bytes(&dist.join("og/web").join(format!("{path}.png")), &image)?;
     }
     Ok(())
@@ -383,8 +427,14 @@ fn render_rss(mut items: Vec<ContentItem>) -> String {
             rss::ItemBuilder::default()
                 .title(Some(item.title))
                 .link(Some(format!("{}/{}", base_url, item.path)))
-                .pub_date(item.date.map(|date| date.format("%a, %d %b %Y").to_string()))
-                .description(item.description.or_else(|| Some("Read more about this content".to_string())))
+                .pub_date(
+                    item.date
+                        .map(|date| date.format("%a, %d %b %Y").to_string()),
+                )
+                .description(
+                    item.description
+                        .or_else(|| Some("Read more about this content".to_string())),
+                )
                 .build(),
         );
     }

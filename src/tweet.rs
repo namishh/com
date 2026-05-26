@@ -141,7 +141,6 @@ async fn load_media_image(url: &str) -> Option<DynamicImage> {
     image::load_from_memory(&bytes).ok()
 }
 
-
 fn draw_text<F: Font>(
     image: &mut DynamicImage,
     text: &str,
@@ -365,6 +364,108 @@ fn clean_text(name: &str) -> String {
         .collect()
 }
 
+fn gradient_colors(id: &str) -> ((u8, u8, u8), (u8, u8, u8), (f32, f32)) {
+    let mut hasher = sha2::Sha256::new();
+    hasher.update(id.as_bytes());
+    let hash = hasher.finalize();
+
+    let color1 = (hash[0], hash[1], hash[2]);
+    let color2 = (hash[3], hash[4], hash[5]);
+    let theta = (hash[6] as f32 / 255.0) * 2.0 * PI;
+
+    (color1, color2, (theta.cos(), theta.sin()))
+}
+
+fn draw_tweet_background(
+    image: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
+    id: &str,
+    x0: i32,
+    y0: i32,
+    w: i32,
+    h: i32,
+) {
+    let (color1, color2, v) = gradient_colors(id);
+    let width = image.width();
+    let total_height = image.height() as i32;
+
+    for y in 0..image.height() {
+        for x in 0..width {
+            let x_i32 = x as i32;
+            let y_i32 = y as i32;
+
+            let in_tweet_area = x0 <= x_i32 && x_i32 < x0 + w && y0 <= y_i32 && y_i32 < y0 + h;
+
+            if in_tweet_area {
+                image.put_pixel(x, y, Rgba([5, 5, 5, 255]));
+            } else {
+                let p_x = x as f32;
+                let p_y = y as f32;
+                let proj = p_x * v.0 + p_y * v.1;
+                let t = ((proj - min_proj(width as f32, total_height as f32, v))
+                    / (max_proj(width as f32, total_height as f32, v)
+                        - min_proj(width as f32, total_height as f32, v)))
+                .clamp(0.0, 1.0);
+                let (r, g, b) = interpolate(color1, color2, t);
+                image.put_pixel(x, y, Rgba([r, g, b, 255]));
+            }
+        }
+    }
+}
+
+fn encode_png(dynamic_image: &DynamicImage) -> Vec<u8> {
+    let mut bytes = Vec::new();
+    image::codecs::png::PngEncoder::new(&mut bytes)
+        .write_image(
+            dynamic_image.as_bytes(),
+            dynamic_image.width(),
+            dynamic_image.height(),
+            image::ExtendedColorType::Rgba8,
+        )
+        .expect("Failed to encode image");
+
+    bytes
+}
+
+fn generate_deleted_tweet_image(
+    id: &str,
+    title_font: &FontRef<'_>,
+    path_font: &FontRef<'_>,
+) -> Vec<u8> {
+    let title_scaled_font = title_font.as_scaled(PxScale::from(28.0));
+    let path_scaled_font = path_font.as_scaled(PxScale::from(14.0));
+
+    let width = 700;
+    let x0: i32 = 20;
+    let y0: i32 = 20;
+    let padding: i32 = 24;
+    let w: i32 = 660;
+    let h: i32 = 150;
+    let total_height = h + y0 * 2;
+
+    let mut image = ImageBuffer::new(width, total_height as u32);
+    draw_tweet_background(&mut image, id, x0, y0, w, h);
+
+    let mut dynamic_image = DynamicImage::ImageRgba8(image);
+    draw_text(
+        &mut dynamic_image,
+        "404: the tweet has been deleted",
+        x0 + padding,
+        y0 + padding,
+        &title_scaled_font,
+        Rgba([238, 238, 238, 255]),
+    );
+    draw_text(
+        &mut dynamic_image,
+        &format!("tweet id: {id}"),
+        x0 + padding,
+        y0 + padding + 46,
+        &path_scaled_font,
+        Rgba([100, 100, 100, 255]),
+    );
+
+    encode_png(&dynamic_image)
+}
+
 pub async fn generate_tweet(
     id: &str,
     title_font: &FontRef<'_>,
@@ -380,20 +481,23 @@ pub async fn generate_tweet(
         .build()
         .unwrap();
 
-    let response = client
-        .get(&tweet_url)
-        .send()
-        .await
-        .expect("Failed to fetch tweet data");
-    let body = response
-        .bytes()
-        .await
-        .expect("Failed to read response body");
-    let json: Value = serde_json::from_slice(&body).expect("Failed to parse JSON");
+    let response = match client.get(&tweet_url).send().await {
+        Ok(response) if response.status().is_success() => response,
+        _ => return Ok(generate_deleted_tweet_image(id, title_font, path_font)),
+    };
+    let body = match response.bytes().await {
+        Ok(body) => body,
+        Err(_) => return Ok(generate_deleted_tweet_image(id, title_font, path_font)),
+    };
+    let json: Value = match serde_json::from_slice(&body) {
+        Ok(json) => json,
+        Err(_) => return Ok(generate_deleted_tweet_image(id, title_font, path_font)),
+    };
 
-    let tweet_data = parse_tweet_data(json)
-        .await
-        .ok_or("Failed to parse tweet data")?;
+    let tweet_data = match parse_tweet_data(json).await {
+        Some(tweet_data) => tweet_data,
+        None => return Ok(generate_deleted_tweet_image(id, title_font, path_font)),
+    };
 
     let profile_image = match load_profile_image(
         &tweet_data.profile_image_url,
@@ -410,15 +514,6 @@ pub async fn generate_tweet(
     } else {
         None
     };
-
-    let mut hasher = sha2::Sha256::new();
-    hasher.update(id.as_bytes());
-    let hash = hasher.finalize();
-
-    let color1 = (hash[0], hash[1], hash[2]);
-    let color2 = (hash[3], hash[4], hash[5]);
-    let theta = (hash[6] as f32 / 255.0) * 2.0 * PI;
-    let v = (theta.cos(), theta.sin());
 
     let width = 700;
     let x0: i32 = 20;
@@ -437,30 +532,7 @@ pub async fn generate_tweet(
     let total_height = h + y0 * 2;
 
     let mut image = ImageBuffer::new(width, total_height as u32);
-
-    for y in 0..total_height as u32 {
-        for x in 0..width {
-            let x_i32 = x as i32;
-            let y_i32 = y as i32;
-
-            let in_tweet_area = x0 <= x_i32 && x_i32 < x0 + w && y0 <= y_i32 && y_i32 < y0 + h;
-
-            if in_tweet_area {
-                let fg_color = Rgba([5, 5, 5, 255]); // #0f0f0f
-                image.put_pixel(x, y, fg_color);
-            } else {
-                let p_x = x as f32;
-                let p_y = y as f32;
-                let proj = p_x * v.0 + p_y * v.1;
-                let t = ((proj - min_proj(width as f32, total_height as f32, v))
-                    / (max_proj(width as f32, total_height as f32, v)
-                        - min_proj(width as f32, total_height as f32, v)))
-                .clamp(0.0, 1.0);
-                let (r, g, b) = interpolate(color1, color2, t);
-                image.put_pixel(x, y, Rgba([r, g, b, 255]));
-            }
-        }
-    }
+    draw_tweet_background(&mut image, id, x0, y0, w, h);
 
     let mut dynamic_image = DynamicImage::ImageRgba8(image);
 
@@ -624,7 +696,6 @@ pub async fn generate_tweet(
             Rgba([100, 100, 100, 255]),
         );
 
-
         let replies_x = likes_x + 30;
         let reply_icon_path = "static/_priv/icons/reply.png";
         let reply_icon = load_icon(reply_icon_path);
@@ -661,17 +732,7 @@ pub async fn generate_tweet(
         );
     }
 
-    let mut bytes = Vec::new();
-    image::codecs::png::PngEncoder::new(&mut bytes)
-        .write_image(
-            dynamic_image.as_bytes(),
-            dynamic_image.width(),
-            dynamic_image.height(),
-            image::ExtendedColorType::Rgba8,
-        )
-        .expect("Failed to encode image");
-
-    Ok(bytes)
+    Ok(encode_png(&dynamic_image))
 }
 
 fn min_proj(width: f32, height: f32, v: (f32, f32)) -> f32 {
