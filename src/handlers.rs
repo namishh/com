@@ -48,6 +48,22 @@ pub async fn projects(
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }
 
+pub async fn arts(
+    app_state: web::Data<AppState>,
+    _: web::Query<HashMap<String, String>>,
+    req: HttpRequest,
+) -> Result<HttpResponse, actix_web::Error> {
+    let file_tree = get_file_tree(&app_state.file_tree);
+    let mut context = Context::new();
+    context.insert("file_tree", &file_tree);
+    context.insert("path", &req.path());
+    let html = app_state
+        .tera
+        .render("art.html", &context)
+        .map_err(|_| actix_web::error::ErrorInternalServerError("Template error"))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(html))
+}
+
 pub async fn media(
     app_state: web::Data<AppState>,
     _: web::Query<HashMap<String, String>>,
@@ -327,6 +343,7 @@ pub async fn generate_web_og(
         "index" => ("namishh", "personal website and garden"),
         "search" => ("namishh", "search stuff around here"),
         "stuff" => ("namishh", "stuff i have built"),
+        "art" => ("namishh", "art i have made"),
         "kino" => ("namishh", "list of personal resources"),
         "media" => ("namishh", "media i consume and review"),
         _ => return Ok(HttpResponse::NotFound().body("Invalid web path")),

@@ -71,6 +71,16 @@ const PAGES: &[Page] = &[
         context: Some(add_projects_context),
     },
     Page {
+        template: "art.html",
+        route: "/art",
+        output: "art/index.html",
+        og_path: Some("art"),
+        og_title: "namishh",
+        og_subtitle: "art i have made",
+        context: None,
+    },
+
+    Page {
         template: "media.html",
         route: "/media",
         output: "media/index.html",

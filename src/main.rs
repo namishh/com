@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 use crate::file_tree::build_file_tree;
 use crate::handlers::{
     generate_og_image, generate_tweet_image, generate_web_og, health_check, index, media, projects,
-    resume, search, search_page, view_markdown,
+    resume, search, search_page, view_markdown, arts
 };
 use crate::rss::rss_feed;
 use crate::search::initialize_search_index;
@@ -67,6 +67,7 @@ async fn main() -> std::io::Result<()> {
             .service(actix_files::Files::new("/static", "./static"))
             .service(web::resource("/").route(web::get().to(index)))
             .service(web::resource("/stuff").route(web::get().to(projects)))
+            .service(web::resource("/art").route(web::get().to(arts)))
             .service(web::resource("/media").route(web::get().to(media)))
             .service(web::resource("/resume").route(web::get().to(resume)))
             .service(web::resource("/search").route(web::get().to(search_page)))
