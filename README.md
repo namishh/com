@@ -15,5 +15,5 @@ $ cargo watch -w src -w Cargo.toml -w templates -w content -w static/_priv -w st
 
 
 ## cmds to export
-$ cargon run --bin export
+$ cargo run --bin export
 </samp>
