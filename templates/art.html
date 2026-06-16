@@ -3,6 +3,108 @@
 {% block head %}
     {{ super() }}
     <script src="/static/gol.js" defer></script>
+    <style>
+        .art-masonry {
+            column-count: 1;
+            column-gap: 1rem;
+        }
+
+        .art-item {
+            display: block;
+            width: 100%;
+            margin-bottom: 1rem;
+            cursor: zoom-in;
+            break-inside: avoid;
+            background: transparent;
+        }
+
+        .art-item img {
+            width: 100%;
+            height: auto;
+        }
+
+        .art-lightbox {
+            display: grid;
+            place-items: center;
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            padding: 0;
+            margin: auto;
+            border: 0;
+            background: transparent;
+            outline: none;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.96);
+            transition:
+                opacity 180ms ease,
+                transform 180ms ease,
+                visibility 180ms ease;
+        }
+
+        .art-lightbox[open] {
+            display: grid;
+            place-items: center;
+        }
+
+        .art-lightbox.is-open {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .art-lightbox::backdrop {
+            background: transparent;
+            transition: background 180ms ease;
+        }
+
+        .art-lightbox.is-open::backdrop {
+            background: rgb(0 0 0 / 0.82);
+        }
+
+        .art-lightbox img {
+            max-width: 96vw;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+            cursor: zoom-out;
+            opacity: 0;
+            transform: scale(0.98);
+            transition:
+                opacity 180ms ease,
+                transform 180ms ease;
+        }
+
+        .art-lightbox img.is-loaded {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .art-lightbox-close {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            color: white;
+            cursor: pointer;
+            background: rgb(0 0 0 / 0.55);
+            padding: 0.5rem 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .art-masonry {
+                column-count: 2;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .art-masonry {
+                column-count: 3;
+            }
+        }
+    </style>
 {% endblock head %}
 {% block meta %}
     <meta property="og:title" content="nam's art" />
@@ -21,14 +123,103 @@
 
 <h2 class="mb-4 text-normal">drawing since 8th feb 2026. digitally since 21st may 2026</h2>
 
-<div class="flex flex-col gap-4">
-<img src="/static/images/0001-gestures.png" alt="">
-<img src="/static/images/0002-gestures-2.png" alt="">
-<img src="/static/images/0004-umas.png" alt="">
-<img src="/static/images/0005-anime-faces-2.png" alt="">
-<img src="/static/images/0006-boys.png" alt="">
-<img src="/static/images/0008-knight.png" alt="">
+<div class="art-masonry">
+    <button class="art-item" type="button" aria-label="Open gestures drawing">
+        <img src="/static/images/0001-gestures.png" alt="gestures drawing">
+    </button>
+    <button class="art-item" type="button" aria-label="Open gestures 2 drawing">
+        <img src="/static/images/0002-gestures-2.png" alt="gestures 2 drawing">
+    </button>
+    <button class="art-item" type="button" aria-label="Open umas drawing">
+        <img src="/static/images/0004-umas.png" alt="umas drawing">
+    </button>
+    <button class="art-item" type="button" aria-label="Open anime faces 2 drawing">
+        <img src="/static/images/0005-anime-faces-2.png" alt="anime faces 2 drawing">
+    </button>
+    <button class="art-item" type="button" aria-label="Open boys drawing">
+        <img src="/static/images/0006-boys.png" alt="boys drawing">
+    </button>
+    <button class="art-item" type="button" aria-label="Open knight drawing">
+        <img src="/static/images/0008-knight.png" alt="knight drawing">
+    </button>
+    <button class="art-item" type="button" aria-label="Open hands drawing">
+        <img src="/static/images/0010-hands.png" alt="hands drawing">
+    </button>
+    <button class="art-item" type="button" aria-label="Open hands 2 drawing">
+        <img src="/static/images/0011-hands-2.png" alt="hands 2 drawing">
+    </button>
+    <button class="art-item" type="button" aria-label="Open hands 3 drawing">
+        <img src="/static/images/0012-hands-3.png" alt="hands 3 drawing">
+    </button>
 </div>
+
+<dialog class="art-lightbox" id="art-lightbox" aria-label="Expanded artwork">
+    <button class="art-lightbox-close" type="button">close</button>
+    <img id="art-lightbox-image" src="" alt="">
+</dialog>
+
+<script>
+    const lightbox = document.getElementById("art-lightbox");
+    const lightboxImage = document.getElementById("art-lightbox-image");
+    let closeTimer;
+
+    function closeLightbox() {
+        lightbox.classList.remove("is-open");
+        lightboxImage.classList.remove("is-loaded");
+        window.clearTimeout(closeTimer);
+        closeTimer = window.setTimeout(() => {
+            lightbox.close();
+        }, 180);
+    }
+
+    document.querySelectorAll(".art-item img").forEach((image) => {
+        image.parentElement.addEventListener("click", async () => {
+            window.clearTimeout(closeTimer);
+            lightbox.classList.remove("is-open");
+            lightboxImage.classList.remove("is-loaded");
+            lightboxImage.removeAttribute("src");
+
+            const nextImage = new Image();
+            nextImage.src = image.src;
+            nextImage.alt = image.alt;
+
+            if (nextImage.decode) {
+                await nextImage.decode().catch(() => {});
+            }
+
+            lightboxImage.alt = image.alt;
+            lightboxImage.src = image.src;
+            lightbox.showModal();
+
+            requestAnimationFrame(() => {
+                lightbox.classList.add("is-open");
+                lightboxImage.classList.add("is-loaded");
+            });
+        });
+    });
+
+    lightbox.addEventListener("close", () => {
+        lightbox.classList.remove("is-open");
+        lightboxImage.classList.remove("is-loaded");
+        lightboxImage.removeAttribute("src");
+        lightboxImage.alt = "";
+    });
+
+    lightbox.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        closeLightbox();
+    });
+
+    lightbox.addEventListener("click", (event) => {
+        if (
+            event.target === lightbox ||
+            event.target.classList.contains("art-lightbox-close") ||
+            event.target === lightboxImage
+        ) {
+            closeLightbox();
+        }
+    });
+</script>
 
 {% endblock content %}
 

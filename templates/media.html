@@ -2,6 +2,23 @@
 {% block title %}media{% endblock title %}
 {% block head %}
     {{ super() }}
+    <style>
+        .media-filter-button.is-active {
+            background: #171717;
+            color: #f5f5f5;
+        }
+
+        html[data-theme="dark"] .media-filter-button.is-active {
+            background: #f5f5f5;
+            color: #171717;
+        }
+
+        .media-filter-control:focus,
+        .media-filter-control:focus-visible {
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
 {% endblock head %}
 {% block meta %}
     <meta property="og:title" content="nam's media" />
@@ -25,9 +42,28 @@
         {% if media | length == 0 %}
             <p class="normal-text">no media reviews yet...</p>
         {% else %}
-            <div class="flex flex-col gap-4">
+            <div class="mb-4 flex flex-wrap items-center gap-2">
+                <label class="flex items-center gap-2 text-sm">
+                    <select id="media-category-filter" class="media-filter-control bg-neutral-100 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 px-2 py-2">
+                        <option value="">everything</option>
+                    </select>
+                </label>
+                <div class="flex flex-wrap items-center gap-2" aria-label="media tag filters">
+                    <button class="media-filter-control media-filter-button border border-neutral-300 dark:border-neutral-800 px-2 cursor-pointer py-2 text-sm" type="button" data-tag-filter="abysmal dogshit">
+                        abysmal dogshit
+                    </button>
+                    <button class="media-filter-control media-filter-button border border-neutral-300 dark:border-neutral-800 px-2 cursor-pointer py-2 text-sm" type="button" data-tag-filter="nam's recommended">
+                        nam's recommended
+                    </button>
+ 
+                </div>
+            </div>
+
+            <p id="media-empty-state" class="normal-text hidden">no media matches those filters...</p>
+
+            <div class="flex flex-col gap-4" id="media-list">
                 {% for item in media %}
-                    <div class="media-card border border-neutral-300 dark:border-neutral-800 flex flex-col md:flex-row overflow-hidden">
+                    <div class="media-card border border-neutral-300 dark:border-neutral-800 flex flex-col md:flex-row overflow-hidden" data-category="{{ item.category }}">
                         <div class="w-full md:w-40 h-56 md:h-auto flex-shrink-0 overflow-hidden">
                             <img src="{{ item.image }}" alt="{{ item.name }}" class="w-full h-full object-cover" />
                         </div>
@@ -42,7 +78,7 @@
                                 <span class="font-mono text-neutral-100 dark:text-neutral-900 bg-neutral-700 dark:bg-neutral-300 text-xs px-2 py-1">{{ item.category }}</span>
                                 {% if item.tags %}
                                     {% for tag in item.tags %}
-                                        <span class="font-mono dark:text-neutral-200 text-neutral-600 bg-neutral-200 dark:bg-neutral-800 text-xs px-2 py-1">{{ tag }}</span>
+                                        <span class="font-mono dark:text-neutral-200 text-neutral-600 bg-neutral-200 dark:bg-neutral-800 text-xs px-2 py-1" data-media-tag>{{ tag }}</span>
                                     {% endfor %}
                                 {% endif %}
                             </div>
@@ -53,6 +89,65 @@
                     </div>
                 {% endfor %}
             </div>
+
+            <script>
+                const categoryFilter = document.getElementById("media-category-filter");
+                const emptyState = document.getElementById("media-empty-state");
+                const mediaCards = Array.from(document.querySelectorAll(".media-card"));
+                const tagButtons = Array.from(document.querySelectorAll("[data-tag-filter]"));
+                const activeTags = new Set();
+
+                const categories = [
+                    ...new Set(mediaCards.map((card) => card.dataset.category)),
+                ].sort();
+
+                categories.forEach((category) => {
+                    const option = document.createElement("option");
+                    option.value = category;
+                    option.textContent = category;
+                    categoryFilter.append(option);
+                });
+
+                function updateMediaFilters() {
+                    const selectedCategory = categoryFilter.value;
+                    let visibleCount = 0;
+
+                    mediaCards.forEach((card) => {
+                        const cardTags = Array.from(card.querySelectorAll("[data-media-tag]")).map((tag) =>
+                            tag.textContent.trim(),
+                        );
+                        const matchesCategory =
+                            !selectedCategory || card.dataset.category === selectedCategory;
+                        const matchesTags =
+                            activeTags.size === 0 || cardTags.some((tag) => activeTags.has(tag));
+                        const isVisible = matchesCategory && matchesTags;
+
+                        card.classList.toggle("hidden", !isVisible);
+                        if (isVisible) {
+                            visibleCount += 1;
+                        }
+                    });
+
+                    emptyState.classList.toggle("hidden", visibleCount > 0);
+                }
+
+                categoryFilter.addEventListener("change", updateMediaFilters);
+
+                tagButtons.forEach((button) => {
+                    button.addEventListener("click", () => {
+                        const tag = button.dataset.tagFilter;
+
+                        if (activeTags.has(tag)) {
+                            activeTags.delete(tag);
+                        } else {
+                            activeTags.add(tag);
+                        }
+
+                        button.classList.toggle("is-active", activeTags.has(tag));
+                        updateMediaFilters();
+                    });
+                });
+            </script>
         {% endif %}
     </div>
 {% endblock content %}

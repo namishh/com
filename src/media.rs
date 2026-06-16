@@ -21,6 +21,22 @@ pub fn get_media() -> Vec<MediaItem> {
             score: 6.8,
         },
         MediaItem {
+            name: "Hollow Knight".to_string(),
+            category: "game".to_string(),
+            tags: Some(vec!["nam's recommended".to_string()]),
+            score: 10.0,
+            desc: Some(("simply one of the best games I have ever played. good learning curve, beautiful aesthetics and music. really drives you to explore the world more and more. a very good entry point into metroidvanias.").to_string()),
+            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlX0XzMgaLleJG-WgAUDUhTrLav5Mcr9BaSZSvE0DfbAPXEsr5wESN_lnk0o4SF_Tj_kZJ&s=10".to_string(),
+        },
+        MediaItem {
+            name: "Silksong".to_string(),
+            category: "game".to_string(),
+            tags: Some(vec!["nam's recommended".to_string()]),
+            score: 9.0,
+            desc: Some(("the difficulty cuve is 10x the prequel, and the difficulty feels artificially inflated at multiple points. that being said, its also 2x the size of the prequel.").to_string()),
+            image: "https://m.media-amazon.com/images/M/MV5BMjA4NWE1YWMtNjQ4ZC00Y2Q3LWFjMGEtNGVhM2FmYzJjMzM1XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg".to_string(),
+        },
+        MediaItem {
             name: "The Beginning Of Infinity".to_string(),
             category: "book".to_string(),
             tags: Some(vec!["currently reading".to_string()]),
@@ -43,6 +59,14 @@ pub fn get_media() -> Vec<MediaItem> {
             image: "https://m.media-amazon.com/images/M/MV5BYjgwYzA1NWMtNDYyZi00ZGQyLWI5NTktMDYwZjE2OTIwZWEwXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg".to_string(),
             desc: None,
             score: 9.8,
+        },
+        MediaItem {
+            name: "Celeste".to_string(),
+            category: "game".to_string(),
+            tags: Some(vec!["nam's recommended".to_string(), "currently playing".to_string()]),
+            score: 10.0,
+            desc: Some(("i keep coming back to this game everytime i feel down, because the story this game tells is so inspiring and beautiful. even though the game is about overcoming the challenges of coming out as trans, it doesnt feel like it and the story template of overcoming obstacles with determination can be molded into whatever personal struggles the player is going through. gameplay wise, smooth character controller, some annoying levels, but nothing artifically inflated.").to_string()),
+            image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Celeste_box_art_full.png/250px-Celeste_box_art_full.png".to_string(),
         },
         MediaItem {
             name: "Black Mirror".to_string(),
