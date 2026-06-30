@@ -236,14 +236,9 @@ pub async fn generate_tweet_image(
 }
 
 pub async fn resume() -> impl Responder {
-    let pdf_path = "./static/pdfs/resume.pdf";
-    match fs::read(pdf_path) {
-        Ok(content) => HttpResponse::Ok()
-            .content_type("application/pdf")
-            .append_header(("Content-Disposition", "inline"))
-            .body(content),
-        Err(_) => HttpResponse::NotFound().body("PDF not found"),
-    }
+    HttpResponse::Found()
+        .append_header(("Location", "/static/pdfs/resume.pdf"))
+        .finish()
 }
 
 pub async fn search(query: web::Query<SearchQuery>) -> Result<HttpResponse, actix_web::Error> {

@@ -131,6 +131,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let avatar = actix_rt::System::new().block_on(image_generator::load_avatar());
 
     render_pages(dist, &tera, &file_tree)?;
+    write_redirect(&dist.join("resume/index.html"), "/static/pdfs/resume.pdf")?;
 
     let mut search_documents = Vec::new();
     let mut content_items = Vec::new();
@@ -489,6 +490,13 @@ fn copy_dir(from: &Path, to: &Path) -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     Ok(())
+}
+
+fn write_redirect(path: &Path, target: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let html = format!(
+        "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta http-equiv=\"refresh\" content=\"0; url={target}\">\n<link rel=\"canonical\" href=\"{target}\">\n<title>Redirecting…</title>\n</head>\n<body>\n<p>Redirecting to <a href=\"{target}\">{target}</a></p>\n</body>\n</html>\n"
+    );
+    write_file(path, &html)
 }
 
 fn write_file(path: &Path, content: &str) -> Result<(), Box<dyn std::error::Error>> {
