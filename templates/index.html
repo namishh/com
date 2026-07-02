@@ -41,7 +41,134 @@ head %} {{ super() }}
         ><i class="ph-thin ph-x-logo"></i> x dot com</a
     >
 </div>
+<style>
+    .marquee {
+        overflow: hidden;
+        width: 100%;
+    }
+    .marquee-track {
+        display: flex;
+        width: max-content;
+        will-change: transform;
+    }
+    .marquee-track a {
+        flex: 0 0 auto;
+        margin-right: 0.75rem;
+    }
+    .marquee-track img {
+        display: block;
+        max-width: none;
+    }
+    .marquee:hover .marquee-track {
+        animation-play-state: paused;
+    }
+    @keyframes marquee-scroll {
+        from { transform: translateX(0); }
+        to   { transform: translateX(var(--marquee-shift, 0)); }
+    }
+</style>
+<div class="marquee my-4">
+    <div class="marquee-track" id="buttonMarquee">
+        <a href="https://namishh.com">
+        <img src="/static/images/button_nam.png" alt="">
+        </a>
+        <a href="https://neovim.io">
+        <img src="/static/images/button_neovim.png" alt="">
+        </a>
+        <a href="https://nixos.org">
+        <img src="/static/images/button_nix.gif" alt="">
+        </a>
+        <a href="https://ring.seggs.lol">
+            <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/90365542/604070415-f4bd0e19-e15e-46ce-9505-2a373f579a73.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20260702%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260702T145500Z&X-Amz-Expires=300&X-Amz-Signature=65b84e313b489f19528a6c6df5c29912b4109301fbb829023798adbd5b8ac164&X-Amz-SignedHeaders=host&response-content-type=image%2Fpng" alt="">
+        </a>
+        <a href="https://amrita.town">
+            <img src="/static/images/button_amrita.gif" alt="">
+        </a>
+        <a href="#">
+            <img src="/static/images/button_lain.gif" alt="">
+        </a>
+        <a href="https://www.aseprite.org/">
+            <img src="/static/images/but_aseprite_madewith.png" alt="">
+        </a>
+        <a href="https://www.nithitsuki.com/">
+            <img src="/static/images/button_nithi.png" alt="">
+        </a>
+    </div>
+</div>
+<script>
+    (function () {
+        var track = document.getElementById("buttonMarquee");
+        if (!track) return;
+        var marquee = track.parentElement;
+        var originals = Array.prototype.map.call(track.children, function (n) {
+            return n.cloneNode(true);
+        });
+        var SPEED = 40; // pixels per second
 
+        function build() {
+            track.style.animation = "none";
+            track.innerHTML = "";
+            originals.forEach(function (n) {
+                track.appendChild(n.cloneNode(true));
+            });
+
+            var containerWidth = marquee.clientWidth;
+            // Repeat the button set until one "unit" is at least as wide as
+            // the container, so the strip is never empty on screen.
+            var guard = 0;
+            while (track.scrollWidth < containerWidth && guard < 50) {
+                originals.forEach(function (n) {
+                    track.appendChild(n.cloneNode(true));
+                });
+                guard++;
+            }
+
+            var unitWidth = track.scrollWidth;
+            // Duplicate the unit once so scrolling by exactly one unit loops seamlessly.
+            var unitNodes = Array.prototype.map.call(track.children, function (n) {
+                return n.cloneNode(true);
+            });
+            unitNodes.forEach(function (n) {
+                track.appendChild(n);
+            });
+
+            var duration = unitWidth / SPEED;
+            track.style.setProperty("--marquee-shift", "-" + unitWidth + "px");
+            track.style.animation = "marquee-scroll " + duration + "s linear infinite";
+        }
+
+        // Preload every button image first, then build exactly once. Building
+        // before images have real dimensions (or rebuilding on each image load)
+        // restarts the animation and causes the startup stutter.
+        var srcs = originals
+            .map(function (a) {
+                var img = a.querySelector("img");
+                return img ? img.getAttribute("src") : null;
+            })
+            .filter(Boolean);
+
+        var pending = srcs.length;
+        function onReady() {
+            if (--pending <= 0) build();
+        }
+        if (pending === 0) {
+            build();
+        } else {
+            srcs.forEach(function (src) {
+                var im = new Image();
+                im.onload = onReady;
+                im.onerror = onReady;
+                im.src = src;
+            });
+        }
+
+        var resizeTimer;
+        window.addEventListener("resize", function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(build, 200);
+        });
+    })();
+</script>
 <a class="group" href="/art">
 <img style="height: 300px; width: 100%; object-fit: cover;" class="my-4 opacity-70 group-hover:opacity-100 transition-all" src="/static/images/index.png" alt="">
 </a>
@@ -167,5 +294,4 @@ head %} {{ super() }}
     <a class="link" href="https://ring.seggs.lol">ring</a>
     <a class="link" href="https://ring.seggs.lol/redirect?from=namish&dir=next">next</a>
 </div>
-
 {% endblock content %}
