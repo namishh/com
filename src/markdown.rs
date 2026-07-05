@@ -24,6 +24,7 @@ fn get_inkjet_language(lang_str: &str) -> Option<Language> {
         "zig" => Some(Language::Zig),
         "nix" => Some(Language::Nix),
         "glsl" => Some(Language::Glsl),
+        "go" => Some(Language::Go),
         _ => None,
     }
 }

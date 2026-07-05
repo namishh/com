@@ -5,8 +5,8 @@ use std::sync::{Arc, Mutex};
 
 use crate::file_tree::build_file_tree;
 use crate::handlers::{
-    generate_og_image, generate_tweet_image, generate_web_og, health_check, index, media, projects,
-    resume, search, search_page, view_markdown, arts
+    arts, generate_og_image, generate_tweet_image, generate_web_og, health_check, index, media,
+    projects, resume, search, search_page, view_markdown,
 };
 use crate::rss::rss_feed;
 use crate::search::initialize_search_index;

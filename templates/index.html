@@ -15,8 +15,9 @@ head %} {{ super() }}
 {% endblock meta %} {% block content %}
 <p class="text-n normal-text">
     hey there 👋 ! i like <span class="underlined">nixos</span>,
-    <span class="underlined">neovim</span> and
-    <span class="underlined">minimalism</span>.
+    <span class="underlined">neovim</span>,
+    <span class="underlined">minimalism</span> and
+    <span class="underlined">hypocrisy</span>.
 </p>
 <p class="text-n normal-text mt-4">
     i live in the cli, probably programming. i code mostly for the web but
@@ -63,44 +64,60 @@ head %} {{ super() }}
         animation-play-state: paused;
     }
     @keyframes marquee-scroll {
-        from { transform: translateX(0); }
-        to   { transform: translateX(var(--marquee-shift, 0)); }
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(var(--marquee-shift, 0));
+        }
     }
 </style>
 <div class="marquee my-4">
     <div class="marquee-track" id="buttonMarquee">
         <a href="https://namishh.com">
-        <img src="/static/images/button_nam.png" alt="">
+            <img src="/static/images/button_nam.png" alt="" />
         </a>
         <a href="https://neovim.io">
-        <img src="/static/images/button_neovim.png" alt="">
+            <img src="/static/images/button_neovim.png" alt="" />
         </a>
         <a href="https://nixos.org">
-        <img src="/static/images/button_nix.gif" alt="">
+            <img src="/static/images/button_nix.gif" alt="" />
         </a>
         <a href="https://ring.seggs.lol">
-            <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/90365542/604070415-f4bd0e19-e15e-46ce-9505-2a373f579a73.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20260702%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260702T145500Z&X-Amz-Expires=300&X-Amz-Signature=65b84e313b489f19528a6c6df5c29912b4109301fbb829023798adbd5b8ac164&X-Amz-SignedHeaders=host&response-content-type=image%2Fpng" alt="">
+            <img
+                src="https://github-production-user-asset-6210df.s3.amazonaws.com/90365542/604070415-f4bd0e19-e15e-46ce-9505-2a373f579a73.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20260702%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260702T145500Z&X-Amz-Expires=300&X-Amz-Signature=65b84e313b489f19528a6c6df5c29912b4109301fbb829023798adbd5b8ac164&X-Amz-SignedHeaders=host&response-content-type=image%2Fpng"
+                alt=""
+            />
         </a>
         <a href="https://amrita.town">
-            <img src="/static/images/button_amrita.gif" alt="">
+            <img src="/static/images/button_amrita.gif" alt="" />
         </a>
         <a href="https://rohith.net">
-            <img src="/static/images/button_rv.png" alt="">
+            <img src="/static/images/button_rv.png" alt="" />
         </a>
         <a href="https://anemoia.moe/">
-            <img src="/static/images/button_jesx.gif" alt="">
+            <img src="/static/images/button_jesx.gif" alt="" />
+        </a>
+        <a href="https://melqtx.com">
+            <img src="https://melqtx.com/images/buton.png" alt="" />
         </a>
         <a href="#">
-            <img src="/static/images/button_lain.gif" alt="">
+            <img src="/static/images/button_lain.gif" alt="" />
         </a>
         <a href="https://amdkits.me/">
-            <img src="https://amdkits.me/kits.gif" alt="amdkits" width="88" height="31" style="image-rendering: pixelated; border: none;">
+            <img
+                src="https://amdkits.me/kits.gif"
+                alt="amdkits"
+                width="88"
+                height="31"
+                style="image-rendering: pixelated; border: none"
+            />
         </a>
         <a href="https://www.aseprite.org/">
-            <img src="/static/images/but_aseprite_madewith.png" alt="">
+            <img src="/static/images/but_aseprite_madewith.png" alt="" />
         </a>
         <a href="https://www.nithitsuki.com/">
-            <img src="/static/images/button_nithi.png" alt="">
+            <img src="/static/images/button_nithi.png" alt="" />
         </a>
     </div>
 </div>
@@ -121,7 +138,6 @@ head %} {{ super() }}
                 track.appendChild(n.cloneNode(true));
             });
 
-
             var containerWidth = marquee.clientWidth;
             // Repeat the button set until one "unit" is at least as wide as
             // the container, so the strip is never empty on screen.
@@ -135,16 +151,20 @@ head %} {{ super() }}
 
             var unitWidth = track.scrollWidth;
             // Duplicate the unit once so scrolling by exactly one unit loops seamlessly.
-            var unitNodes = Array.prototype.map.call(track.children, function (n) {
-                return n.cloneNode(true);
-            });
+            var unitNodes = Array.prototype.map.call(
+                track.children,
+                function (n) {
+                    return n.cloneNode(true);
+                },
+            );
             unitNodes.forEach(function (n) {
                 track.appendChild(n);
             });
 
             var duration = unitWidth / SPEED;
             track.style.setProperty("--marquee-shift", "-" + unitWidth + "px");
-            track.style.animation = "marquee-scroll " + duration + "s linear infinite";
+            track.style.animation =
+                "marquee-scroll " + duration + "s linear infinite";
         }
 
         // Preload every button image first, then build exactly once. Building
@@ -180,7 +200,12 @@ head %} {{ super() }}
     })();
 </script>
 <a class="group" href="/art">
-<img style="height: 300px; width: 100%; object-fit: cover;" class="my-4 opacity-70 group-hover:opacity-100 transition-all" src="/static/images/index.png" alt="">
+    <img
+        style="height: 300px; width: 100%; object-fit: cover"
+        class="my-4 opacity-70 group-hover:opacity-100 transition-all"
+        src="/static/images/index.png"
+        alt=""
+    />
 </a>
 <div class="mt-6 text-n normal-text">some projects</div>
 <div class="flex flex-wrap w-full">
@@ -228,7 +253,7 @@ head %} {{ super() }}
     lightroom-esque editor in rust and nextjs
 </p>
 <p class="text-n normal-text mt-2">
-    <a href="https://github.com/namishh/nurture" class="link">nurture</a> - 
+    <a href="https://github.com/namishh/nurture" class="link">nurture</a> -
     basic ui library for widgets in löve2d
 </p>
 <p class="text-n normal-text mt-2">
@@ -241,7 +266,7 @@ head %} {{ super() }}
 </p>
 
 <p class="text-n normal-text mt-6">
-    some more links <i class="ph-fill ph-arrow-right"></i> 
+    some more links <i class="ph-fill ph-arrow-right"></i>
 </p>
 <a href="/media" class="link">all the stuff that i consoom</a>
 
@@ -262,7 +287,11 @@ head %} {{ super() }}
         />
     </a>
     <a href="https://mridul.sh">
-        <img src="https://avatars.githubusercontent.com/u/65942753?v=4" alt="rex" class="h-10 w-10" />
+        <img
+            src="https://avatars.githubusercontent.com/u/65942753?v=4"
+            alt="rex"
+            class="h-10 w-10"
+        />
     </a>
     <a href="https://quantinium.dev">
         <img
@@ -298,7 +327,7 @@ head %} {{ super() }}
 </div>
 
 <div class="mt-4 mb-6 flex gap-4">
-    <p>uni webring: </p>
+    <p>uni webring:</p>
     <a class="normal-text" href="https://amrita.town">amrita.town</a>
     <a class="link" href="https://amrita.town/prev">prev</a>
     <a class="link" href="https://amrita.town/random">roll</a>
@@ -306,9 +335,13 @@ head %} {{ super() }}
 </div>
 
 <div class="mt-4 mb-6 flex gap-4">
-    <p>threadlocked: </p>
-    <a class="link" href="https://ring.seggs.lol/redirect?from=namish&dir=prev">prev</a>
+    <p>threadlocked:</p>
+    <a class="link" href="https://ring.seggs.lol/redirect?from=namish&dir=prev"
+        >prev</a
+    >
     <a class="link" href="https://ring.seggs.lol">ring</a>
-    <a class="link" href="https://ring.seggs.lol/redirect?from=namish&dir=next">next</a>
+    <a class="link" href="https://ring.seggs.lol/redirect?from=namish&dir=next"
+        >next</a
+    >
 </div>
 {% endblock content %}
