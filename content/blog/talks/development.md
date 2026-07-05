@@ -29,7 +29,7 @@ Instead I try to have as much fun as I can making projects that I find interesti
 <br/>
 There is no need for all projects to be some form of web sass slop that shows how capable you are in gluing together postgres with react. Sometimes its just the random toy projects or "reinventing the wheel" kind of projects that give the most yield.
 <br/>
-Another way to make development fun is to sometimes be your own project's user. I developed [holmes](https://github.com/namishh/holmes) for my school's compeition and tailored it so that the non technical leads do not have problems with the administrator ui. A year before that I created this neovim plugin called [prism](https://github.com/namishh/prism), which I am pretty sure I am the only user left, to create custom colorschemes easily. Right now, at [flora](https://flora.tf), we are making [orchid](https://orchid.rex.wf), a meme editor specifically for low end devices because dingboard runs at 4 fps.
+Another way to make development fun is to sometimes be your own project's user. I developed [holmes](https://github.com/namishh/holmes) for my school's compeition and tailored it so that the non technical leads do not have problems with the administrator ui. A year before that I created this neovim plugin called [prism](https://github.com/namishh/prism), which I am pretty sure I am the only user left, to create custom colorschemes easily. Right now, at [flora](https://floraorg.github.io), we are making [orchid](https://orchid.rex.wf), a meme editor specifically for low end devices because dingboard runs at 4 fps.
 
 ### It is fun to be competent
 

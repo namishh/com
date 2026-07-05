@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Project {
@@ -23,7 +23,7 @@ pub fn get_projects() -> Vec<ProjectCategory> {
                     name: "aster".to_string(),
                     desc: "redefining the way to collaborate with people on youtube channels.".to_string(),
                     tech: vec!["solid start".to_string()],
-                    link: Some("https://flora.tf".to_string()),
+                    link: Some("https://floraorg.github.io".to_string()),
                 },
                 Project {
                     name: "orchid".to_string(),
