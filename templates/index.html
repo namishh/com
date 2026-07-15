@@ -12,7 +12,60 @@ head %} {{ super() }}
 <meta property="twitter:description" content="personal garden and website" />
 <meta name="twitter:title" content="nam's site" />
 <meta property="twitter:image" content="/og/web/index.png" />
-{% endblock meta %} {% block content %}
+{% endblock meta %}
+{% macro button_group() %}
+<div class="marquee-group">
+    <a href="https://neovim.io">
+        <img src="/static/images/button_neovim.png" alt="" />
+    </a>
+    <a href="https://nixos.org">
+        <img src="/static/images/button_nix.gif" alt="" />
+    </a>
+    <a href="https://namishh.com">
+        <img src="/static/images/button_nam.png" alt="" />
+    </a>
+    <a href="https://floraorg.github.io">
+        <img src="https://floraorg.github.io/88x31.png" alt="" />
+    </a>
+    <a href="https://haarshmap.github.io">
+        <img src="/static/images/button_harsha.png" alt="" />
+    </a>
+    <a href="https://ring.seggs.lol">
+        <img src="/static/images/button_tl.png" alt="" />
+    </a>
+    <a href="https://amrita.town">
+        <img src="/static/images/button_amrita.gif" alt="" />
+    </a>
+    <a href="https://www.nithitsuki.com/">
+        <img src="/static/images/button_nithi.png" alt="" />
+    </a>
+    <a href="https://quantinium.dev/">
+        <img src="/static/images/button_quant.png" alt="" />
+    </a>
+    <a href="https://rohith.net">
+        <img src="/static/images/button_rv.png" alt="" />
+    </a>
+    <a href="https://anemoia.moe/">
+        <img src="/static/images/button_jesx.gif" alt="" />
+    </a>
+    <a href="https://melqtx.com">
+        <img src="https://melqtx.com/images/buton.png" alt="" />
+    </a>
+    <a href="#">
+        <img src="/static/images/button_lain.gif" alt="" />
+    </a>
+    <a href="https://thatarcticpenguin.is-a.dev/">
+        <img src="/static/images/button_savi.jpg" alt="" />
+    </a>
+    <a href="https://amdkits.me/">
+        <img src="https://amdkits.me/kits.gif" alt="amdkits" />
+    </a>
+    <a href="https://www.aseprite.org/">
+        <img src="/static/images/but_aseprite_madewith.png" alt="" />
+    </a>
+</div>
+{% endmacro %}
+{% block content %}
 <p class="text-n normal-text">
     hey there 👋 ! i like <span class="underlined">nixos</span>,
     <span class="underlined">neovim</span>,
@@ -46,165 +99,56 @@ head %} {{ super() }}
     .marquee {
         overflow: hidden;
         width: 100%;
+        mask-image: linear-gradient(
+            to right,
+            transparent 0%,
+            black 15%,
+            black 85%,
+            transparent 100%
+        );
     }
     .marquee-track {
         display: flex;
         width: max-content;
         will-change: transform;
+        animation: marquee-scroll 35s linear infinite;
     }
-    .marquee-track a {
+    .marquee-group {
+        display: flex;
+        flex-shrink: 0;
+    }
+    .marquee-group a {
         flex: 0 0 auto;
         margin-right: 0.75rem;
+        transition: opacity 150ms ease;
     }
     .marquee-track img {
         display: block;
-        max-width: none;
+        width: 88px;
+        height: 31px;
     }
-    .marquee:hover .marquee-track {
+    .marquee:has(a:hover) .marquee-track {
         animation-play-state: paused;
     }
+    .marquee-track:has(a:hover) a:not(:hover) {
+        opacity: 0.35;
+    }
     @keyframes marquee-scroll {
-        from {
-            transform: translateX(0);
-        }
         to {
-            transform: translateX(var(--marquee-shift, 0));
+            transform: translateX(-50%);
+        }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .marquee-track {
+            animation-play-state: paused;
         }
     }
 </style>
 <div class="marquee my-4">
-    <div class="marquee-track" id="buttonMarquee">
-        <a href="https://namishh.com">
-            <img src="/static/images/button_nam.png" alt="" />
-        </a>
-        <a href="https://neovim.io">
-            <img src="/static/images/button_neovim.png" alt="" />
-        </a>
-        <a href="https://nixos.org">
-            <img src="/static/images/button_nix.gif" alt="" />
-        </a>
-        <a href="https://floraorg.github.io">
-            <img src="https://floraorg.github.io/88x31.png" alt="" />
-        </a>
-        <a href="https://haarshmap.github.io">
-            <img src="/static/images/button_harsha.png" alt="" />
-        </a>
-        <a href="https://ring.seggs.lol">
-            <img src="/static/images/button_tl.png" alt="" />
-        </a>
-        <a href="https://amrita.town">
-            <img src="/static/images/button_amrita.gif" alt="" />
-        </a>
-        <a href="https://rohith.net">
-            <img src="/static/images/button_rv.png" alt="" />
-        </a>
-        <a href="https://anemoia.moe/">
-            <img src="/static/images/button_jesx.gif" alt="" />
-        </a>
-        <a href="https://melqtx.com">
-            <img src="https://melqtx.com/images/buton.png" alt="" />
-        </a>
-        <a href="#">
-            <img src="/static/images/button_lain.gif" alt="" />
-        </a>
-        <a href="https://thatarcticpenguin.is-a.dev/">
-            <img src="/static/images/button_savi.jpg" alt="" />
-        </a>
-        <a href="https://amdkits.me/">
-            <img
-                src="https://amdkits.me/kits.gif"
-                alt="amdkits"
-                width="88"
-                height="31"
-                style="image-rendering: pixelated; border: none"
-            />
-        </a>
-        <a href="https://www.aseprite.org/">
-            <img src="/static/images/but_aseprite_madewith.png" alt="" />
-        </a>
-        <a href="https://www.nithitsuki.com/">
-            <img src="/static/images/button_nithi.png" alt="" />
-        </a>
+    <div class="marquee-track">
+        {{ self::button_group() }} {{ self::button_group() }}
     </div>
 </div>
-<script>
-    (function () {
-        var track = document.getElementById("buttonMarquee");
-        if (!track) return;
-        var marquee = track.parentElement;
-        var originals = Array.prototype.map.call(track.children, function (n) {
-            return n.cloneNode(true);
-        });
-        var SPEED = 40; // pixels per second
-
-        function build() {
-            track.style.animation = "none";
-            track.innerHTML = "";
-            originals.forEach(function (n) {
-                track.appendChild(n.cloneNode(true));
-            });
-
-            var containerWidth = marquee.clientWidth;
-            // Repeat the button set until one "unit" is at least as wide as
-            // the container, so the strip is never empty on screen.
-            var guard = 0;
-            while (track.scrollWidth < containerWidth && guard < 50) {
-                originals.forEach(function (n) {
-                    track.appendChild(n.cloneNode(true));
-                });
-                guard++;
-            }
-
-            var unitWidth = track.scrollWidth;
-            // Duplicate the unit once so scrolling by exactly one unit loops seamlessly.
-            var unitNodes = Array.prototype.map.call(
-                track.children,
-                function (n) {
-                    return n.cloneNode(true);
-                },
-            );
-            unitNodes.forEach(function (n) {
-                track.appendChild(n);
-            });
-
-            var duration = unitWidth / SPEED;
-            track.style.setProperty("--marquee-shift", "-" + unitWidth + "px");
-            track.style.animation =
-                "marquee-scroll " + duration + "s linear infinite";
-        }
-
-        // Preload every button image first, then build exactly once. Building
-        // before images have real dimensions (or rebuilding on each image load)
-        // restarts the animation and causes the startup stutter.
-        var srcs = originals
-            .map(function (a) {
-                var img = a.querySelector("img");
-                return img ? img.getAttribute("src") : null;
-            })
-            .filter(Boolean);
-
-        var pending = srcs.length;
-        function onReady() {
-            if (--pending <= 0) build();
-        }
-        if (pending === 0) {
-            build();
-        } else {
-            srcs.forEach(function (src) {
-                var im = new Image();
-                im.onload = onReady;
-                im.onerror = onReady;
-                im.src = src;
-            });
-        }
-
-        var resizeTimer;
-        window.addEventListener("resize", function () {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(build, 200);
-        });
-    })();
-</script>
 <a class="group" href="/art">
     <img
         style="height: 300px; width: 100%; object-fit: cover"
@@ -277,7 +221,7 @@ head %} {{ super() }}
 <a href="/media" class="link">all the stuff that i consoom</a>
 
 <div class="mt-6 text-n normal-text">
-    cool people <i class="ph-fill ph-arrow-right"></i>
+    cool people and rings <i class="ph-fill ph-arrow-right"></i>
 </div>
 <p class="text-n normal-text mt-2">
     here are some of my <span class="underlined">cool friends</span>, do
@@ -333,7 +277,6 @@ head %} {{ super() }}
 </div>
 
 <div class="mt-4 mb-6 flex gap-4">
-    <p>uni webring:</p>
     <a class="normal-text" href="https://amrita.town">amrita.town</a>
     <a class="link" href="https://amrita.town/prev">prev</a>
     <a class="link" href="https://amrita.town/random">roll</a>
@@ -341,7 +284,6 @@ head %} {{ super() }}
 </div>
 
 <div class="mt-4 mb-6 flex gap-4">
-    <p>frens and cracked devs:</p>
     <a class="normal-text" href="https://ring.seggs.lol">threadlocked</a>
     <a class="link" href="https://ring.seggs.lol/redirect?from=namish&dir=prev"
         >prev</a

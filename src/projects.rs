@@ -32,10 +32,10 @@ pub fn get_projects() -> Vec<ProjectCategory> {
                     link: Some("https://orchid.rex.wf".to_string()),
                 },
                 Project {
-                    name: "sakura".to_string(),
-                    desc: "beautiful, fast and uniquely generated avatars as a microservice".to_string(),
+                    name: "squiggle".to_string(),
+                    desc: "self hostable, llm moderated, secure tiny guestbook".to_string(),
                     tech: vec!["golang".to_string()],
-                    link: Some("https://github.com/floraorg/sakura".to_string()),
+                    link: Some("https://github.com/namishh/squiggle".to_string()),
                 },
                 Project {
                     name: "faux".to_string(),
@@ -48,6 +48,12 @@ pub fn get_projects() -> Vec<ProjectCategory> {
         ProjectCategory {
             r#type: "Good Projects".to_string(),
             array: vec![
+                Project {
+                    name: "minima".to_string(),
+                    desc: "minimal css and js helpers to make experimental ui fast. shadcn inspired look".to_string(),
+                    tech: vec!["js".to_string(), "css".to_string()],
+                    link: Some("https://minima.namishh.com".to_string()),
+                },
                 Project {
                     name: "yap".to_string(),
                     desc: "dialogue backend for löve2d".to_string(),
