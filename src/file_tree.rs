@@ -36,6 +36,9 @@ pub fn build_file_tree(base: &Path, relative: &Path) -> Vec<FileNode> {
 
             if is_dir {
                 let children = build_file_tree(base, &rel_path);
+                if children.is_empty() {
+                    continue;
+                }
                 nodes.push(FileNode {
                     name: file_name,
                     path: path_str,
@@ -44,6 +47,7 @@ pub fn build_file_tree(base: &Path, relative: &Path) -> Vec<FileNode> {
                 });
             } else if path.extension().map_or(false, |ext| ext == "md") {
                 let mut name = String::new();
+                let mut is_draft = false;
                 let default_name = path
                     .file_stem()
                     .unwrap_or_default()
@@ -68,10 +72,16 @@ pub fn build_file_tree(base: &Path, relative: &Path) -> Vec<FileNode> {
                         if in_frontmatter {
                             if let Some((key, value)) = trimmed_line.split_once(':') {
                                 let key = key.trim();
-                                if key == "title" {
-                                    name = value.trim().to_string();
-                                    found_title = true;
-                                    break;
+                                let value = value.trim();
+                                match key {
+                                    "title" if !value.is_empty() => {
+                                        name = value.to_string();
+                                        found_title = true;
+                                    }
+                                    "draft" => {
+                                        is_draft = value.eq_ignore_ascii_case("true");
+                                    }
+                                    _ => {}
                                 }
                             }
                         }
@@ -81,6 +91,10 @@ pub fn build_file_tree(base: &Path, relative: &Path) -> Vec<FileNode> {
                     }
                 } else {
                     name = default_name.clone();
+                }
+
+                if is_draft {
+                    continue;
                 }
 
                 let trimmed_path = if path_str.ends_with(".md") {
