@@ -54,13 +54,13 @@ which resulted in images like
 
 ![img](/static/images/zr-lg.png)
 
-Issues started to occur, when I tried to embed iamges inside the svgs, the images worked fine when I loaded them in the browser, but it just did not work when I converted them with `magickwand`. It turned out to be an issue with imagemagick itself and the it not supporting the correct svg libraries.
+Issues started to occur, when I tried to embed images inside the svgs, the images worked fine when I loaded them in the browser, but it just did not work when I converted them with `magickwand`. It turned out to be an issue with imagemagick itself and it not supporting the correct svg libraries.
 
 My next approach was to use `rsvg` to make the svg, but it cannot alone convert the svg. And the only way I could get around with it was to render the image on the `cairo` surface and save the surface to the png, but it also did not work.
 
 <br>
 
-At this point I was already using `cairo` as a dependency, so I just decided to drop it `rsvg` completely and go all in on `cairo`. `cairo` is certainly verbose and there are a lot of lines to render a background image (I will refrain from posting snippets in this blog), but it worked flawlessly at saving to pngs. And I also wrote this simple overlay function to create a overlay over an image to darken it.
+At this point I was already using `cairo` as a dependency, so I just decided to drop `rsvg` completely and go all in on `cairo`. `cairo` is certainly verbose and there are a lot of lines to render a background image (I will refrain from posting snippets in this blog), but it worked flawlessly for saving pngs. And I also wrote this simple overlay function to create an overlay over an image to darken it.
 
 <br>
 
@@ -78,7 +78,7 @@ try Opengraph.init()
 
  ### Blurring
 
- To make the text on the image more clearer, I implemented a basic box blur (sorry Gauss fans). Unlike Gaussian, every pixel in the window counts equally, and you average the pixels in the window. The size of the window is based on the radius we pass in:
+ To make the text on the image clearer, I implemented a basic box blur (sorry Gauss fans). Unlike Gaussian, every pixel in the window counts equally, and you average the pixels in the window. The size of the window is based on the radius we pass in:
 
 ```zig
 const window = @as(u32, radius) * 2 + 1;
@@ -144,7 +144,7 @@ This results in something like this
 
 ### Text
 
-I initially thought that I had to implement some complex text-wrapping mechanism for this but my job was made 100x easier after discovering [pangocairo](https://docs.gtk.org/PangoCairo/pango_cairo.html), which is a part of [Pango](https://www.gtk.org/docs/architecture/pango), a library for laying out and rendering of text. All I had to was set font, text, width, wrap mode and the library did the work for me.
+I initially thought that I had to implement some complex text-wrapping mechanism for this but my job was made 100x easier after discovering [pangocairo](https://docs.gtk.org/PangoCairo/pango_cairo.html), which is a part of [Pango](https://www.gtk.org/docs/architecture/pango), a library for laying out and rendering text. All I had to do was set font, text, width, wrap mode and the library did the work for me.
 
 ```zig
 c.pango_layout_set_font_description(layout, font_desc);
