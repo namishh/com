@@ -1,6 +1,6 @@
 ---
 title: 1. Opengraph 
-date: 20 July 2026
+date: 23 July 2026
 ---
 
 ![img](/static/images/zr-og.png)
