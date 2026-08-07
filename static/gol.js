@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
     right: "20px",
     zIndex: "100",
     opacity: "0.75",
+    cursor: "pointer",
   });
   document.body.appendChild(canvas);
 
@@ -54,6 +55,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let grid = initializeGrid();
 
+  let mode = "life";
+  let badAppleFrames = [];
+  let frameIndex = 0;
+  let loadingFrames = false;
+
+  canvas.addEventListener("click", async () => {
+    if (mode === "life") {
+      if (badAppleFrames.length === 0 && !loadingFrames) {
+        loadingFrames = true;
+        try {
+          const res = await fetch("/static/_priv/bad_apple/frames.json");
+          badAppleFrames = await res.json();
+        } catch (e) {
+          console.error("Failed to load frames:", e);
+        }
+        loadingFrames = false;
+      }
+      if (badAppleFrames.length > 0) {
+        mode = "badapple";
+      }
+    } else {
+      mode = "life";
+      grid = initializeGrid();
+      seenStates.clear();
+    }
+  });
+
   function getNextState(currentGrid) {
     const newGrid = Array.from({ length: gridHeight }, () =>
       Array(gridWidth).fill(0),
@@ -74,15 +102,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
     return newGrid;
-  }
-
-  function areGridsEqual(gridA, gridB) {
-    for (let i = 0; i < gridHeight; i++) {
-      for (let j = 0; j < gridWidth; j++) {
-        if (gridA[i][j] !== gridB[i][j]) return false;
-      }
-    }
-    return true;
   }
 
   function isGridDead(currentGrid) {
@@ -125,6 +144,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateSimulation() {
+    if (mode === "badapple") {
+      if (badAppleFrames.length === 0) return;
+      grid = badAppleFrames[frameIndex];
+      frameIndex = (frameIndex + 1) % badAppleFrames.length;
+      return;
+    }
+
     const key = serializeGrid(grid);
 
     if (seenStates.has(key) || isGridDead(grid)) {
@@ -146,7 +172,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let animationId;
 
   function gameLoop(currentTime) {
-    if (currentTime - lastUpdateTime >= 100) {
+    const interval = mode === "badapple" ? 35 : 100;
+    if (currentTime - lastUpdateTime >= interval) {
       updateSimulation();
       lastUpdateTime = currentTime;
     }
