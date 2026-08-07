@@ -55,8 +55,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let grid = initializeGrid();
 
+  const frameSize = Math.ceil((gridWidth * gridHeight) / 8);
   let mode = "life";
-  let badAppleFrames = [];
+  let badAppleFrames = new Uint8Array();
   let frameIndex = 0;
   let loadingFrames = false;
 
@@ -65,8 +66,13 @@ document.addEventListener("DOMContentLoaded", function () {
       if (badAppleFrames.length === 0 && !loadingFrames) {
         loadingFrames = true;
         try {
-          const res = await fetch("/static/_priv/bad_apple/frames.json");
-          badAppleFrames = await res.json();
+          const res = await fetch("/static/_priv/bad_apple/frames.bin");
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const frames = new Uint8Array(await res.arrayBuffer());
+          if (!frames.length || frames.length % frameSize !== 0) {
+            throw new Error("Invalid frames.bin");
+          }
+          badAppleFrames = frames;
         } catch (e) {
           console.error("Failed to load frames:", e);
         }
@@ -117,10 +123,15 @@ document.addEventListener("DOMContentLoaded", function () {
     ctx.fillStyle = deadColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    const frameOffset = frameIndex * frameSize;
     ctx.fillStyle = liveColor;
     for (let i = 0; i < gridHeight; i++) {
       for (let j = 0; j < gridWidth; j++) {
-        if (grid[i][j] === 1) {
+        const cellIndex = i * gridWidth + j;
+        const alive =
+          mode === "life"
+            ? grid[i][j] : (badAppleFrames[frameOffset + (cellIndex >> 3)] >> (7 - (cellIndex & 7))) & 1;
+        if (alive) {
           ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
         }
       }
@@ -144,13 +155,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateSimulation() {
-    if (mode === "badapple") {
-      if (badAppleFrames.length === 0) return;
-      grid = badAppleFrames[frameIndex];
-      frameIndex = (frameIndex + 1) % badAppleFrames.length;
-      return;
-    }
-
     const key = serializeGrid(grid);
 
     if (seenStates.has(key) || isGridDead(grid)) {
@@ -172,12 +176,15 @@ document.addEventListener("DOMContentLoaded", function () {
   let animationId;
 
   function gameLoop(currentTime) {
-    const interval = mode === "badapple" ? 35 : 100;
+    const interval = mode === "badapple" ? 33 : 100;
     if (currentTime - lastUpdateTime >= interval) {
-      updateSimulation();
+      if (mode === "life") updateSimulation();
+      drawGrid();
+      if (mode === "badapple") {
+        frameIndex = (frameIndex + 1) % (badAppleFrames.length / frameSize);
+      }
       lastUpdateTime = currentTime;
     }
-    drawGrid();
     animationId = requestAnimationFrame(gameLoop);
   }
 
