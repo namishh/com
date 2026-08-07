@@ -6,7 +6,7 @@ draft: true
 
 ### Introduction
 
-Originally I was hoping that there already be some library like [tera](https://github.com/keats/tera) for zig. But... I was disappointed when there were none. There was a [templ](https://github.com/a-h/templ)-like alternative, but it was more of domain specific html-like language rather than a templating language. If templating was just replacing variables with strings, it would be as easy as finding as an `.replaceAll()` or some equivalent.
+Originally I was hoping that there already be some library like [tera](https://github.com/keats/tera) for zig. But... I was disappointed when there were none. There was a [templ](https://github.com/a-h/templ)-like alternative, but it was more of domain specific html-like language rather than a templating engine. If templating was just replacing variables with strings, it would be as easy as finding as an `.replaceAll()` or some equivalent.
 
 <br>
 
