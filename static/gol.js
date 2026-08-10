@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let animationId;
 
   function gameLoop(currentTime) {
-    const interval = mode === "badapple" ? 33 : 100;
+    const interval = mode === "badapple" ? 35 : 100;
     if (currentTime - lastUpdateTime >= interval) {
       if (mode === "life") updateSimulation();
       drawGrid();

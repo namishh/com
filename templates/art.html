@@ -5,14 +5,22 @@
     <script src="/static/gol.js" defer></script>
     <style>
         .art-masonry {
-            column-count: 1;
-            column-gap: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .art-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            flex: 1;
+            min-width: 0;
         }
 
         .art-item {
             display: block;
             width: 100%;
-            margin-bottom: 1rem;
+            margin-bottom: 0;
             cursor: zoom-in;
             break-inside: avoid;
             background: transparent;
@@ -92,18 +100,6 @@
             background: rgb(0 0 0 / 0.55);
             padding: 0.5rem 0.75rem;
         }
-
-        @media (min-width: 640px) {
-            .art-masonry {
-                column-count: 2;
-            }
-        }
-
-        @media (min-width: 1280px) {
-            .art-masonry {
-                column-count: 3;
-            }
-        }
     </style>
 {% endblock head %}
 {% block meta %}
@@ -123,65 +119,7 @@
 
 <h2 class="mb-4 text-normal">drawing since 8th feb 2026. digitally since 21st may 2026</h2>
 
-<div class="art-masonry">
-    <button class="art-item" type="button" aria-label="Open gestures drawing">
-        <img src="/static/images/0001-gestures.webp" alt="gestures drawing">
-    </button>
-    <button class="art-item" type="button" aria-label="Open gestures 2 drawing">
-        <img src="/static/images/0002-gestures-2.webp" alt="gestures 2 drawing">
-    </button>
-    <button class="art-item" type="button" aria-label="Open umas drawing">
-        <img src="/static/images/0004-umas.webp" alt="umas drawing">
-    </button>
-    <button class="art-item" type="button" aria-label="Open anime faces 2 drawing">
-        <img src="/static/images/0005-anime-faces-2.webp" alt="anime faces 2 drawing">
-    </button>
-    <button class="art-item" type="button" aria-label="Open boys drawing">
-        <img src="/static/images/0006-boys.webp" alt="boys drawing">
-    </button>
-    <button class="art-item" type="button" aria-label="Open knight drawing">
-        <img src="/static/images/0008-knight.webp" alt="knight drawing">
-    </button>
-    <button class="art-item" type="button" aria-label="Open hands drawing">
-        <img src="/static/images/0010-hands.webp" alt="hands drawing">
-    </button>
-    <button class="art-item" type="button" aria-label="Open hands 2 drawing">
-        <img src="/static/images/0011-hands-2.webp" alt="hands 2 drawing">
-    </button>
-    <button class="art-item" type="button" aria-label="Open hands 3 drawing">
-        <img src="/static/images/0012-hands-3.webp" alt="hands 3 drawing">
-    </button>
-    <button class="art-item" type="button" aria-label="Open face parts">
-        <img src="/static/images/0014-face-parts.webp" alt="face parts drawing">
-    </button>
-    <button class="art-item" type="button" aria-label="Open asaro heads">
-        <img src="/static/images/0017-asaro.webp" alt="asaro heads">
-    </button>
-    <button class="art-item" type="button" aria-label="Open garmond and zaza">
-        <img src="/static/images/0015-garmond.webp" alt="garmond">
-    </button>
-    <button class="art-item" type="button" aria-label="Open reze">
-        <img src="/static/images/0016-reze.webp" alt="reze">
-    </button>
-    <button class="art-item" type="button" aria-label="Open head">
-        <img src="/static/images/0018-bust.webp" alt="head">
-    </button>
-    <button class="art-item" type="button" aria-label="Open head">
-        <img src="/static/images/0019-virgin-mary.webp" alt="virgin mary">
-    </button>
-    <button class="art-item" type="button" aria-label="Open portrait">
-        <img src="/static/images/0020-portait-1.webp" alt="acry portait">
-    </button>
-    <button class="art-item" type="button" aria-label="Open lighthouse">
-        <img src="/static/images/0021-pattison.webp" alt="pat">
-    </button>
-    <button class="art-item" type="button" aria-label="Open nobara cosplay">
-        <img src="/static/images/0022-nobara.webp" alt="nobara">
-    </button>
-    <button class="art-item" type="button" aria-label="Open yet another collection of anime girls">
-        <img src="/static/images/0023-anime-girls.webp" alt="anime gals">
-    </button>
-</div>
+<div class="art-masonry" id="art-masonry"></div>
 
 <dialog class="art-lightbox" id="art-lightbox" aria-label="Expanded artwork">
     <button class="art-lightbox-close" type="button">close</button>
@@ -189,9 +127,100 @@
 </dialog>
 
 <script>
+    // single source of truth for ordering — cycling and layout both read from this
+    const artworks = [
+        { src: "/static/images/0001-gestures.webp", alt: "gestures drawing" },
+        { src: "/static/images/0002-gestures-2.webp", alt: "gestures 2 drawing" },
+        { src: "/static/images/0004-umas.webp", alt: "umas drawing" },
+        { src: "/static/images/0005-anime-faces-2.webp", alt: "anime faces 2 drawing" },
+        { src: "/static/images/0006-boys.webp", alt: "boys drawing" },
+        { src: "/static/images/0008-knight.webp", alt: "knight drawing" },
+        { src: "/static/images/0010-hands.webp", alt: "hands drawing" },
+        { src: "/static/images/0011-hands-2.webp", alt: "hands 2 drawing" },
+        { src: "/static/images/0012-hands-3.webp", alt: "hands 3 drawing" },
+        { src: "/static/images/0014-face-parts.webp", alt: "face parts drawing" },
+        { src: "/static/images/0017-asaro.webp", alt: "asaro heads" },
+        { src: "/static/images/0015-garmond.webp", alt: "garmond" },
+        { src: "/static/images/0016-reze.webp", alt: "reze" },
+        { src: "/static/images/0018-bust.webp", alt: "head" },
+        { src: "/static/images/0019-virgin-mary.webp", alt: "virgin mary" },
+        { src: "/static/images/0020-portait-1.webp", alt: "acry portait" },
+        { src: "/static/images/0021-pattison.webp", alt: "pat" },
+        { src: "/static/images/0022-nobara.webp", alt: "nobara" },
+        { src: "/static/images/0023-anime-girls.webp", alt: "anime gals" }
+    ];
+
+    const container = document.getElementById("art-masonry");
     const lightbox = document.getElementById("art-lightbox");
     const lightboxImage = document.getElementById("art-lightbox-image");
     let closeTimer;
+    let currentIndex = -1;
+    let currentCols = 0;
+
+    function getColCount() {
+        if (window.matchMedia("(min-width: 1280px)").matches) return 3;
+        if (window.matchMedia("(min-width: 640px)").matches) return 2;
+        return 1;
+    }
+
+    function render() {
+        const cols = getColCount();
+        if (cols === currentCols) return; // avoid rebuilding on zoom/no-op resizes
+        currentCols = cols;
+
+        container.innerHTML = "";
+        const columns = Array.from({ length: cols }, () => {
+            const col = document.createElement("div");
+            col.className = "art-column";
+            container.appendChild(col);
+            return col;
+        });
+
+        artworks.forEach((art, index) => {
+            const button = document.createElement("button");
+            button.className = "art-item";
+            button.type = "button";
+            button.setAttribute("aria-label", `Open ${art.alt}`);
+
+            const img = document.createElement("img");
+            img.src = art.src;
+            img.alt = art.alt;
+
+            button.appendChild(img);
+            button.addEventListener("click", () => openLightboxAt(index));
+
+            columns[index % cols].appendChild(button);
+        });
+    }
+
+    async function openLightboxAt(index) {
+        if (index < 0 || index >= artworks.length) return;
+        currentIndex = index;
+        const art = artworks[index];
+
+        window.clearTimeout(closeTimer);
+        lightbox.classList.remove("is-open");
+        lightboxImage.classList.remove("is-loaded");
+        lightboxImage.removeAttribute("src");
+
+        const nextImage = new Image();
+        nextImage.src = art.src;
+        nextImage.alt = art.alt;
+
+        if (nextImage.decode) {
+            await nextImage.decode().catch(() => {});
+        }
+
+        lightboxImage.alt = art.alt;
+        lightboxImage.src = art.src;
+        if (!lightbox.open) lightbox.showModal();
+        document.documentElement.style.overflow = "hidden";
+
+        requestAnimationFrame(() => {
+            lightbox.classList.add("is-open");
+            lightboxImage.classList.add("is-loaded");
+        });
+    }
 
     function closeLightbox() {
         lightbox.classList.remove("is-open");
@@ -203,31 +232,21 @@
         }, 180);
     }
 
-    document.querySelectorAll(".art-item img").forEach((image) => {
-        image.parentElement.addEventListener("click", async () => {
-            window.clearTimeout(closeTimer);
-            lightbox.classList.remove("is-open");
-            lightboxImage.classList.remove("is-loaded");
-            lightboxImage.removeAttribute("src");
+    render();
 
-            const nextImage = new Image();
-            nextImage.src = image.src;
-            nextImage.alt = image.alt;
+    // matchMedia listeners fire only on actual breakpoint crossings,
+    // unlike "resize" which fires repeatedly during pinch/ctrl-zoom
+    ["(min-width: 640px)", "(min-width: 1280px)"].forEach((query) => {
+        window.matchMedia(query).addEventListener("change", render);
+    });
 
-            if (nextImage.decode) {
-                await nextImage.decode().catch(() => {});
-            }
-
-            lightboxImage.alt = image.alt;
-            lightboxImage.src = image.src;
-            lightbox.showModal();
-            document.documentElement.style.overflow = "hidden";
-
-            requestAnimationFrame(() => {
-                lightbox.classList.add("is-open");
-                lightboxImage.classList.add("is-loaded");
-            });
-        });
+    document.addEventListener("keydown", (event) => {
+        if (!lightbox.open) return;
+        if (event.key === "ArrowRight") {
+            openLightboxAt((currentIndex + 1) % artworks.length);
+        } else if (event.key === "ArrowLeft") {
+            openLightboxAt((currentIndex - 1 + artworks.length) % artworks.length);
+        }
     });
 
     lightbox.addEventListener("close", () => {
@@ -235,6 +254,7 @@
         lightboxImage.classList.remove("is-loaded");
         lightboxImage.removeAttribute("src");
         lightboxImage.alt = "";
+        currentIndex = -1;
         document.documentElement.style.overflow = "";
     });
 
