@@ -100,6 +100,12 @@
             background: rgb(0 0 0 / 0.55);
             padding: 0.5rem 0.75rem;
         }
+
+        #art-order:focus,
+        #art-order:focus-visible {
+            outline: none;
+            box-shadow: none;
+        }
     </style>
 {% endblock head %}
 {% block meta %}
@@ -118,6 +124,13 @@
 {% block content %}
 
 <h2 class="mb-4 text-normal">drawing since 8th feb 2026. digitally since 21st may 2026</h2>
+
+<div class="mb-4">
+    <select id="art-order" class="bg-neutral-100 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 px-2 py-2 text-sm">
+        <option value="desc">newest first</option>
+        <option value="asc">oldest first</option>
+    </select>
+</div>
 
 <div class="art-masonry" id="art-masonry"></div>
 
@@ -158,11 +171,13 @@
     ];
 
     const container = document.getElementById("art-masonry");
+    const orderSelect = document.getElementById("art-order");
     const lightbox = document.getElementById("art-lightbox");
     const lightboxImage = document.getElementById("art-lightbox-image");
     let closeTimer;
     let currentIndex = -1;
     let currentCols = 0;
+    let currentList = artworks;
 
     function getColCount() {
         if (window.matchMedia("(min-width: 1280px)").matches) return 3;
@@ -170,10 +185,12 @@
         return 1;
     }
 
-    function render() {
+    function render(force = false) {
         const cols = getColCount();
-        if (cols === currentCols) return; // avoid rebuilding on zoom/no-op resizes
+        if (!force && cols === currentCols) return; // avoid rebuilding on zoom/no-op resizes
         currentCols = cols;
+
+        currentList = orderSelect.value === "desc" ? [...artworks].reverse() : artworks;
 
         container.innerHTML = "";
         const columns = Array.from({ length: cols }, () => {
@@ -183,7 +200,7 @@
             return col;
         });
 
-        artworks.forEach((art, index) => {
+        currentList.forEach((art, index) => {
             const button = document.createElement("button");
             button.className = "art-item";
             button.type = "button";
@@ -201,9 +218,9 @@
     }
 
     async function openLightboxAt(index) {
-        if (index < 0 || index >= artworks.length) return;
+        if (index < 0 || index >= currentList.length) return;
         currentIndex = index;
-        const art = artworks[index];
+        const art = currentList[index];
 
         window.clearTimeout(closeTimer);
         lightbox.classList.remove("is-open");
@@ -239,20 +256,22 @@
         }, 180);
     }
 
-    render();
+    render(true);
 
     // matchMedia listeners fire only on actual breakpoint crossings,
     // unlike "resize" which fires repeatedly during pinch/ctrl-zoom
     ["(min-width: 640px)", "(min-width: 1280px)"].forEach((query) => {
-        window.matchMedia(query).addEventListener("change", render);
+        window.matchMedia(query).addEventListener("change", () => render());
     });
+
+    orderSelect.addEventListener("change", () => render(true));
 
     document.addEventListener("keydown", (event) => {
         if (!lightbox.open) return;
         if (event.key === "ArrowRight") {
-            openLightboxAt((currentIndex + 1) % artworks.length);
+            openLightboxAt((currentIndex + 1) % currentList.length);
         } else if (event.key === "ArrowLeft") {
-            openLightboxAt((currentIndex - 1 + artworks.length) % artworks.length);
+            openLightboxAt((currentIndex - 1 + currentList.length) % currentList.length);
         }
     });
 
