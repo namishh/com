@@ -23,7 +23,7 @@ pub fn get_media() -> Vec<MediaItem> {
         MediaItem {
             name: "Ramparts of Ice".to_string(),
             category: "anime".to_string(),
-            tags: Some(vec!["nam's recommended"]),
+            tags: Some(vec!["nam's recommended"].to_string()),
             image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI9TWINzJcHInI4b-0JNCd4tIcYUMc4GhPdROm_xQOWQ&s".to_string(),
             desc: Some("has 4 main characters, and enough screen time and justice is done to each of them.".to_string()),
             score: 9.5,
@@ -31,7 +31,7 @@ pub fn get_media() -> Vec<MediaItem> {
         MediaItem {
             name: "Horimiya".to_string(),
             category: "anime".to_string(),
-            tags: Some(vec!["nam's recommended"]),
+            tags: Some(vec!["nam's recommended"].to_string()),
             image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6p813Zpj3B5qhle-irAEeXtGZyovshGFYhH4INQPwu5P7vJAryI_5JREUsi8pYlCBF1P0Ib5jey_mZHNQJj1arhSZisdRVONxD6H0dx4&s=10".to_string(),
             desc: Some("devastatingly simple anime but overwhelmingly feel good and seeing the characters evolve.".to_string()),
             score: 9.8,
