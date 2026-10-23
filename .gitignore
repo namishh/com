@@ -5,3 +5,4 @@ static/_cache
 dist
 .vscode
 .DS_Store
+static/images/art/px

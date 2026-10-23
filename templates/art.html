@@ -31,6 +31,10 @@
             height: auto;
         }
 
+        .art-item img.art-pixel {
+            image-rendering: pixelated;
+        }
+
         .art-lightbox {
             display: grid;
             place-items: center;
@@ -123,7 +127,9 @@
 {% endblock meta %}
 {% block content %}
 
-<h2 class="mb-4 text-normal">drawing since 8th feb 2026. digitally since 21st may 2026</h2>
+<h2 class="mb-4 text-normal">digital artist since may 2026. self taught. i use <a href="https://xp-pen.co.in/products/deco-01-v3https://xp-pen.co.in/products/deco-01-v3" target="_blank" class="link">deco v1 03</a> and <a href="https://krita.org" target='_blank' class='link'>krita</a>. this is my digital sketchbook, not my best works, <span class="text-n"> so expect roughness (a lot of it)</span> </h2>
+
+<p class="mb-4 text-normal"></p>
 
 <div class="mb-4">
     <select id="art-order" class="bg-neutral-100 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 px-2 py-2 text-sm">
@@ -180,8 +186,16 @@
             button.setAttribute("aria-label", `Open ${art.alt}`);
 
             const img = document.createElement("img");
-            img.src = art.src;
+            img.className = "art-pixel";
+            img.src = art.placeholder;
             img.alt = art.alt;
+
+            const full = new Image();
+            full.src = art.src;
+            full.onload = () => {
+                img.src = art.src;
+                img.classList.remove("art-pixel");
+            };
 
             button.appendChild(img);
             button.addEventListener("click", () => openLightboxAt(index));
