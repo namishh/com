@@ -13,6 +13,7 @@ use crate::search::initialize_search_index;
 use crate::state::AppState;
 use crate::templates::init_tera;
 
+mod art;
 mod file_tree;
 mod handlers;
 mod image_generator;

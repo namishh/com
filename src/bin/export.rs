@@ -12,6 +12,8 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 use tera::Context;
 
+#[path = "../art.rs"]
+mod art;
 #[path = "../file_tree.rs"]
 mod file_tree;
 #[path = "../image_generator.rs"]
@@ -77,7 +79,7 @@ const PAGES: &[Page] = &[
         og_path: Some("art"),
         og_title: "namishh",
         og_subtitle: "art i have made",
-        context: None,
+        context: Some(add_art_context),
     },
 
     Page {
@@ -170,6 +172,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn add_projects_context(context: &mut Context) {
     context.insert("projects", &projects::get_projects());
+}
+
+fn add_art_context(context: &mut Context) {
+    context.insert("artworks", &art::get_artworks());
 }
 
 fn add_media_context(context: &mut Context) {
@@ -404,13 +410,22 @@ fn generate_web_og_images(
         let Some(path) = page.og_path else {
             continue;
         };
-        let image = image_generator::generate_web_og_image(
-            page.og_title,
-            page.og_subtitle,
-            title_font,
-            path_font,
-            avatar,
-        );
+        let image = if path == "art" {
+            image_generator::generate_art_og_image(
+                page.og_title,
+                page.og_subtitle,
+                title_font,
+                path_font,
+            )
+        } else {
+            image_generator::generate_web_og_image(
+                page.og_title,
+                page.og_subtitle,
+                title_font,
+                path_font,
+                avatar,
+            )
+        };
         write_bytes(&dist.join("og/web").join(format!("{path}.png")), &image)?;
     }
     Ok(())

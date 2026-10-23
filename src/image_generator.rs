@@ -285,6 +285,125 @@ pub fn generate_content_og_image(
     bytes
 }
 
+const DITHER_LEVELS: f32 = 4.0;
+
+fn dither_color(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
+    let (w, h) = img.dimensions();
+    let mut buf: Vec<[f32; 3]> = img
+        .pixels()
+        .map(|p| [p[0] as f32, p[1] as f32, p[2] as f32])
+        .collect();
+    for y in 0..h as i32 {
+        for x in 0..w as i32 {
+            let i = (y as u32 * w + x as u32) as usize;
+            let old = buf[i];
+            let mut new = [0.0; 3];
+            for c in 0..3 {
+                new[c] = (old[c] / 255.0 * (DITHER_LEVELS - 1.0)).round() / (DITHER_LEVELS - 1.0)
+                    * 255.0;
+            }
+            buf[i] = new;
+            for (dx, dy, factor) in [(1, 0, 7.0 / 16.0), (-1, 1, 3.0 / 16.0), (0, 1, 5.0 / 16.0), (1, 1, 1.0 / 16.0)] {
+                let (nx, ny) = (x + dx, y + dy);
+                if nx >= 0 && nx < w as i32 && ny < h as i32 {
+                    let j = (ny as u32 * w + nx as u32) as usize;
+                    for c in 0..3 {
+                        buf[j][c] += (old[c] - new[c]) * factor;
+                    }
+                }
+            }
+        }
+    }
+    for (i, p) in img.pixels_mut().enumerate() {
+        *p = Rgba([
+            buf[i][0].clamp(0.0, 255.0) as u8,
+            buf[i][1].clamp(0.0, 255.0) as u8,
+            buf[i][2].clamp(0.0, 255.0) as u8,
+            255,
+        ]);
+    }
+}
+
+fn lcg(state: &mut u64) -> f32 {
+    *state = state
+        .wrapping_mul(6364136223846793005)
+        .wrapping_add(1442695040888963407);
+    ((*state >> 40) & 0xFFFFFF) as f32 / 0x1000000 as f32
+}
+
+pub fn generate_art_og_image(
+    title: &str,
+    subtitle: &str,
+    title_font: &FontRef,
+    path_font: &FontRef,
+) -> Vec<u8> {
+    let mut canvas = ImageBuffer::from_pixel(1200, 630, Rgba([16, 16, 16, 255]));
+
+    let mut recent = crate::art::get_artworks();
+    recent.reverse(); // newest first
+
+    for (i, art) in recent.iter().take(10).rev().enumerate() {
+        let Ok(img) = image::open(art.src.trim_start_matches('/')) else {
+            continue;
+        };
+        let mut rng = 0x9E3779B97F4A7C15u64.wrapping_add((i as u64 + 1).wrapping_mul(0x2545F4914F6CDD1D));
+
+        let target_h = 300.0 + lcg(&mut rng) * 200.0;
+        let aspect = img.width() as f32 / img.height() as f32;
+        let target_w = (target_h * aspect).clamp(180.0, 520.0);
+        let resized = image::imageops::resize(
+            &img,
+            target_w as u32,
+            target_h as u32,
+            image::imageops::FilterType::Lanczos3,
+        );
+        let rotated = imageproc::geometric_transformations::rotate_about_center(
+            &resized,
+            (lcg(&mut rng) - 0.5) * 0.35, // ±~10°
+            imageproc::geometric_transformations::Interpolation::Bilinear,
+            Rgba([0, 0, 0, 0]),
+        );
+
+        let x = (i % 5) as f32 * 240.0 + 120.0 - target_w / 2.0 + (lcg(&mut rng) - 0.5) * 160.0;
+        let y = (i / 5) as f32 * 315.0 + 157.0 - target_h / 2.0 + (lcg(&mut rng) - 0.5) * 120.0;
+        image::imageops::overlay(&mut canvas, &rotated, x as i64, y as i64);
+    }
+
+    dither_color(&mut canvas);
+
+    for p in canvas.pixels_mut() {
+        p[0] = (p[0] as f32 * 0.4) as u8;
+        p[1] = (p[1] as f32 * 0.4) as u8;
+        p[2] = (p[2] as f32 * 0.4) as u8;
+    }
+
+    let title_layout = fit_text(title, title_font, 760, 150, 120, 64);
+    draw_text_layout(
+        &mut canvas,
+        Rgba([255, 255, 255, 255]),
+        100,
+        180,
+        &title_layout,
+        title_font,
+    );
+    let subtitle_scale = PxScale { x: 48.0, y: 48.0 };
+    drawing::draw_text_mut(
+        &mut canvas,
+        Rgba([240, 240, 240, 255]),
+        100,
+        320,
+        subtitle_scale,
+        path_font,
+        subtitle,
+    );
+
+    let mut bytes = Vec::new();
+    image::codecs::png::PngEncoder::new(&mut bytes)
+        .write_image(&canvas.into_raw(), 1200, 630, image::ExtendedColorType::Rgba8)
+        .expect("Failed to encode image");
+    bytes
+}
+
 pub fn generate_web_og_image(
     title: &str,
     subtitle: &str,

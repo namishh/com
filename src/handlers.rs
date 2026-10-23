@@ -1,3 +1,4 @@
+use crate::art::get_artworks;
 use crate::file_tree::get_file_tree;
 use crate::image_generator::{generate_content_og_image, generate_web_og_image};
 use crate::markdown::{extract_frontmatter, markdown_to_html};
@@ -56,6 +57,7 @@ pub async fn arts(
     let file_tree = get_file_tree(&app_state.file_tree);
     let mut context = Context::new();
     context.insert("file_tree", &file_tree);
+    context.insert("artworks", &get_artworks());
     context.insert("path", &req.path());
     let html = app_state
         .tera
@@ -346,9 +348,13 @@ pub async fn generate_web_og(
 
     let title_font = &*app_state.title_font;
     let path_font = &*app_state.path_font;
-    let avatar = crate::image_generator::load_avatar().await;
 
-    let image_bytes = generate_web_og_image(title, subtitle, title_font, path_font, &avatar);
+    let image_bytes = if path_segment == "art" {
+        crate::image_generator::generate_art_og_image(title, subtitle, title_font, path_font)
+    } else {
+        let avatar = crate::image_generator::load_avatar().await;
+        generate_web_og_image(title, subtitle, title_font, path_font, &avatar)
+    };
 
     Ok(HttpResponse::Ok()
         .content_type("image/png")
