@@ -9,6 +9,9 @@ pub struct Artwork {
     pub src: String,
     pub alt: String,
     pub placeholder: String,
+    pub best: bool,
+    #[serde(skip)]
+    code: u32,
 }
 
 static PLACEHOLDERS: Lazy<Mutex<HashMap<String, String>>> =
@@ -16,11 +19,12 @@ static PLACEHOLDERS: Lazy<Mutex<HashMap<String, String>>> =
 
 // tiny (16px wide) pixelated mosaic as a data URI, shown until the full image loads.
 // cached on disk in static/images/art/px/, regenerated only when the source file is newer
-fn make_placeholder(name: &str) -> String {
+// (px cache is flat and keyed by filename — codes are unique across art/ and art/best/)
+fn make_placeholder(dir: &str, name: &str) -> String {
     if let Some(cached) = PLACEHOLDERS.lock().unwrap().get(name) {
         return cached.clone();
     }
-    let placeholder = load_or_generate(name).unwrap_or_default();
+    let placeholder = load_or_generate(dir, name).unwrap_or_default();
     PLACEHOLDERS
         .lock()
         .unwrap()
@@ -28,8 +32,8 @@ fn make_placeholder(name: &str) -> String {
     placeholder
 }
 
-fn load_or_generate(name: &str) -> Option<String> {
-    let src_path = format!("static/images/art/{name}");
+fn load_or_generate(dir: &str, name: &str) -> Option<String> {
+    let src_path = format!("static/images/art/{dir}{name}");
     let px_path = format!("static/images/art/px/{}.png", name.rsplit_once('.')?.0);
 
     let mtime = |p: &str| std::fs::metadata(p).and_then(|m| m.modified()).ok();
@@ -68,31 +72,41 @@ fn base64(data: &[u8]) -> String {
     out
 }
 
+fn read_art_dir(dir: &str, best: bool, artworks: &mut Vec<Artwork>) {
+    if let Ok(rd) = std::fs::read_dir(format!("static/images/art/{dir}")) {
+        artworks.extend(rd.flatten().filter_map(|entry| {
+            let name = entry.file_name().into_string().ok()?;
+            let (stem, ext) = name.rsplit_once('.')?;
+            if !matches!(
+                ext.to_ascii_lowercase().as_str(),
+                "webp" | "png" | "jpg" | "jpeg" | "gif" | "avif"
+            ) {
+                return None;
+            }
+            let code: u32 = stem
+                .chars()
+                .take_while(|c| c.is_ascii_digit())
+                .collect::<String>()
+                .parse()
+                .unwrap_or(0);
+            let alt = stem
+                .trim_start_matches(|c: char| c.is_ascii_digit() || c == '-')
+                .replace('-', " ");
+            Some(Artwork {
+                placeholder: make_placeholder(dir, &name),
+                src: format!("/static/images/art/{dir}{name}"),
+                alt,
+                best,
+                code,
+            })
+        }));
+    }
+}
+
 pub fn get_artworks() -> Vec<Artwork> {
-    let mut artworks: Vec<Artwork> = std::fs::read_dir("static/images/art")
-        .map(|rd| {
-            rd.flatten()
-                .filter_map(|entry| {
-                    let name = entry.file_name().into_string().ok()?;
-                    let (stem, ext) = name.rsplit_once('.')?;
-                    if !matches!(
-                        ext.to_ascii_lowercase().as_str(),
-                        "webp" | "png" | "jpg" | "jpeg" | "gif" | "avif"
-                    ) {
-                        return None;
-                    }
-                    let alt = stem
-                        .trim_start_matches(|c: char| c.is_ascii_digit() || c == '-')
-                        .replace('-', " ");
-                    Some(Artwork {
-                        placeholder: make_placeholder(&name),
-                        src: format!("/static/images/art/{name}"),
-                        alt,
-                    })
-                })
-                .collect()
-        })
-        .unwrap_or_default();
-    artworks.sort_by(|a, b| a.src.cmp(&b.src));
+    let mut artworks = Vec::new();
+    read_art_dir("", false, &mut artworks);
+    read_art_dir("best/", true, &mut artworks);
+    artworks.sort_by_key(|a| a.code);
     artworks
 }

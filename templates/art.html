@@ -105,8 +105,20 @@
             padding: 0.5rem 0.75rem;
         }
 
+        .art-filter-button.is-active {
+            background: #171717;
+            color: #f5f5f5;
+        }
+
+        html[data-theme="dark"] .art-filter-button.is-active {
+            background: #f5f5f5;
+            color: #171717;
+        }
+
         #art-order:focus,
-        #art-order:focus-visible {
+        #art-order:focus-visible,
+        .art-filter-button:focus,
+        .art-filter-button:focus-visible {
             outline: none;
             box-shadow: none;
         }
@@ -127,15 +139,16 @@
 {% endblock meta %}
 {% block content %}
 
-<h2 class="mb-4 text-normal">digital artist since may 2026. self taught. i use <a href="https://xp-pen.co.in/products/deco-01-v3https://xp-pen.co.in/products/deco-01-v3" target="_blank" class="link">deco v1 03</a> and <a href="https://krita.org" target='_blank' class='link'>krita</a>. this is my digital sketchbook, not my best works, <span class="text-n"> so expect roughness (a lot of it)</span> </h2>
+<h2 class="mb-4 text-normal">digital artist since may 2026. self taught. i use <a href="https://xp-pen.co.in/products/deco-01-v3https://xp-pen.co.in/products/deco-01-v3" target="_blank" class="link">deco v1 03</a> and <a href="https://krita.org" target='_blank' class='link'>krita</a></h2>
 
 <p class="mb-4 text-normal"></p>
 
-<div class="mb-4">
+<div class="mb-4 flex items-center gap-2">
     <select id="art-order" class="bg-neutral-100 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 px-2 py-2 text-sm">
         <option value="desc">newest first</option>
         <option value="asc">oldest first</option>
     </select>
+    <button id="art-best-filter" type="button" class="art-filter-button bg-neutral-100 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 px-2 py-2 text-sm cursor-pointer">better stuff</button>
 </div>
 
 <div class="art-masonry" id="art-masonry"></div>
@@ -151,6 +164,8 @@
 
     const container = document.getElementById("art-masonry");
     const orderSelect = document.getElementById("art-order");
+    const bestFilter = document.getElementById("art-best-filter");
+    let bestOnly = false;
     const lightbox = document.getElementById("art-lightbox");
     const lightboxImage = document.getElementById("art-lightbox-image");
     let closeTimer;
@@ -169,7 +184,8 @@
         if (!force && cols === currentCols) return; // avoid rebuilding on zoom/no-op resizes
         currentCols = cols;
 
-        currentList = orderSelect.value === "desc" ? [...artworks].reverse() : artworks;
+        const pool = bestOnly ? artworks.filter((art) => art.best) : artworks;
+        currentList = orderSelect.value === "desc" ? [...pool].reverse() : pool;
 
         container.innerHTML = "";
         const columns = Array.from({ length: cols }, () => {
@@ -252,6 +268,12 @@
     });
 
     orderSelect.addEventListener("change", () => render(true));
+
+    bestFilter.addEventListener("click", () => {
+        bestOnly = !bestOnly;
+        bestFilter.classList.toggle("is-active", bestOnly);
+        render(true);
+    });
 
     document.addEventListener("keydown", (event) => {
         if (!lightbox.open) return;
