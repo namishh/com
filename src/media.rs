@@ -10,191 +10,54 @@ pub struct MediaItem {
     pub score: f32,
 }
 
+const REVIEWS: &str = include_str!("../static/_priv/reviews.txt");
+
 pub fn get_media() -> Vec<MediaItem> {
-    vec![
-        MediaItem {
-            name: "Balatro".to_string(),
-            category: "game".to_string(),
-            tags: Some(vec!["nam's recommended".to_string(), "top #1".to_string()]),
-            score: 10.0,
-            desc: Some(("stuntman stuntman brainstorm blueprint").to_string()),
-            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlA8jbjI2uKssW64NMmB9iCfYY_fsgO01byBUf6e9BbP-moZCBrVwWiR8p&s=10".to_string(),
-        },
-        MediaItem {
-            name: "Ramparts of Ice".to_string(),
-            category: "anime".to_string(),
-            tags: Some(vec!["nam's recommended".to_string()]),
-            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI9TWINzJcHInI4b-0JNCd4tIcYUMc4GhPdROm_xQOWQ&s".to_string(),
-            desc: Some("has 4 main characters, and enough screen time and justice is done to each of them.".to_string()),
-            score: 9.5,
-        },
-        MediaItem {
-            name: "Horimiya".to_string(),
-            category: "anime".to_string(),
-            tags: Some(vec!["nam's recommended".to_string()]),
-            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6p813Zpj3B5qhle-irAEeXtGZyovshGFYhH4INQPwu5P7vJAryI_5JREUsi8pYlCBF1P0Ib5jey_mZHNQJj1arhSZisdRVONxD6H0dx4&s=10".to_string(),
-            desc: Some("devastatingly simple anime but overwhelmingly feel good and seeing the characters evolve.".to_string()),
-            score: 9.8,
-        },
-        MediaItem {
-            name: "Reze Arc".to_string(),
-            category: "anime movie".to_string(),
-            tags: None,
-            image: "https://upload.wikimedia.org/wikipedia/en/thumb/9/95/Chainsaw_Man_Reze_Arc_movie_poster.jpg/250px-Chainsaw_Man_Reze_Arc_movie_poster.jpg".to_string(),
-            desc: Some("reze is an interesting character i wish her and denji were given more time. heavily carried by the fight scenes.".to_string()),
-            score: 6.8,
-        },
-        MediaItem {
-            name: "Hollow Knight".to_string(),
-            category: "game".to_string(),
-            tags: Some(vec!["nam's recommended".to_string()]),
-            score: 10.0,
-            desc: Some(("simply one of the best games I have ever played. good learning curve, beautiful aesthetics and music. really drives you to explore the world more and more. a very good entry point into metroidvanias.").to_string()),
-            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlX0XzMgaLleJG-WgAUDUhTrLav5Mcr9BaSZSvE0DfbAPXEsr5wESN_lnk0o4SF_Tj_kZJ&s=10".to_string(),
-        },
-        MediaItem {
-            name: "Silksong".to_string(),
-            category: "game".to_string(),
-            tags: Some(vec!["nam's recommended".to_string()]),
-            score: 9.0,
-            desc: Some(("the difficulty cuve is 10x the prequel, and the difficulty feels artificially inflated at multiple points. that being said, its also 2x the size of the prequel.").to_string()),
-            image: "https://m.media-amazon.com/images/M/MV5BMjA4NWE1YWMtNjQ4ZC00Y2Q3LWFjMGEtNGVhM2FmYzJjMzM1XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg".to_string(),
-        },
-        MediaItem {
-            name: "The Beginning Of Infinity".to_string(),
-            category: "book".to_string(),
-            tags: Some(vec!["currently reading".to_string()]),
-            image: "https://u.cubeupload.com/namishhhh/thebeginningofinfini.jpeg".to_string(),
-            desc: None,
-            score: 10.0,
-        },
-        MediaItem {
-            name: "Chainsaw Man".to_string(),
-            category: "manga".to_string(),
-            tags: Some(vec!["currently reading".to_string()]),
-            image: "https://dwgkfo5b3odmw.cloudfront.net/manga/thumbs/thumb-105160-ChainsawMan_GN12_C1_Web-3-pGYFpo-UbtfnbBYz-wRXyA.jpg".to_string(),
-            desc: Some("much better then the anime adaptation.".to_string()),
-            score: 8.0,
-        },
-        MediaItem {
-            name: "True Detective".to_string(),
-            category: "tv".to_string(),
-            tags: Some(vec!["nam's recommended".to_string()]),
-            image: "https://m.media-amazon.com/images/M/MV5BYjgwYzA1NWMtNDYyZi00ZGQyLWI5NTktMDYwZjE2OTIwZWEwXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg".to_string(),
-            desc: None,
-            score: 9.8,
-        },
-        MediaItem {
-            name: "Celeste".to_string(),
-            category: "game".to_string(),
-            tags: Some(vec!["nam's recommended".to_string(), "currently playing".to_string()]),
-            score: 10.0,
-            desc: Some(("i keep coming back to this game everytime i feel down, because the story this game tells is so inspiring and beautiful. even though the game is about overcoming the challenges of coming out as trans, it doesnt feel like it and the story template of overcoming obstacles with determination can be molded into whatever personal struggles the player is going through. gameplay wise, smooth character controller, some annoying levels, but nothing artifically inflated.").to_string()),
-            image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Celeste_box_art_full.png/250px-Celeste_box_art_full.png".to_string(),
-        },
-        MediaItem {
-            name: "Black Mirror".to_string(),
-            category: "tv".to_string(),
-            tags: Some(vec!["currently watching".to_string()]),
-            image: "https://m.media-amazon.com/images/M/MV5BODcxMWI2NDMtYTc3NC00OTZjLWFmNmUtM2NmY2I1ODkxYzczXkEyXkFqcGc@._V1_.jpg".to_string(),
-            desc: None,
-            score: 9.0,
-        },
-        MediaItem {
-            name: "Cowboy Bebop".to_string(),
-            category: "anime".to_string(),
-            tags: Some(vec!["peak".to_string()]),
-            image: "https://upload.wikimedia.org/wikipedia/en/a/a9/Cowboy_Bebop_key_visual.jpg".to_string(),
-            desc: Some("makes smoking look cool. 10/10".to_string()),
-            score: 10.0,
-        },
-        MediaItem {
-            name: "Frieren: Beyond Journey's End".to_string(),
-            category: "anime".to_string(),
-            tags: None,
-            image: "https://m.media-amazon.com/images/M/MV5BZTI4ZGMxN2UtODlkYS00MTBjLWE1YzctYzc3NDViMGI0ZmJmXkEyXkFqcGc@._V1_.jpg".to_string(),
-            desc: Some("good world building. also a great filter for racists".to_string()),
-            score: 7.0,
-        },
-        MediaItem {
-            name: "Watchmen".to_string(),
-            category: "book".to_string(),
-            tags: None,
-            image: "https://static.dc.com/dc/files/default_images/19084_400x600.jpg".to_string(),
-            desc: Some("fantastic.".to_string()),
-            score: 9.5,
-        },
-        MediaItem {
-            name: "Solo Levelling".to_string(),
-            category: "anime".to_string(),
-            tags: Some(vec!["abysmal dogshit".to_string()]),
-            image: "https://m.media-amazon.com/images/M/MV5BM2M4YzdkMTEtMjUyYy00ZWY0LWI5ODQtNGRkZWQ1MzU5MWM2XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg".to_string(),
-            desc: Some("insomnia final treatment".to_string()),
-            score: 0.0,
-        },
-        MediaItem {
-            name: "JoJo: Battle Tendency (part 2)".to_string(),
-            category: "anime".to_string(),
-            tags: Some(vec!["nam's recommended".to_string()]),
-            image: "https://static.jojowiki.com/images/thumb/3/34/latest/20191015213237/Volume_11.jpg/800px-Volume_11.jpg".to_string(),
-            desc: Some("my fav jojo part. not reviewing others (only watched till crusaders)".to_string()),
-            score: 10.0,
-        },
-        MediaItem {
-            name: "Death Note".to_string(),
-            category: "anime".to_string(),
-            tags: None,
-            image: "https://m.media-amazon.com/images/M/MV5BYTgyZDhmMTEtZDFhNi00MTc4LTg3NjUtYWJlNGE5Mzk2NzMxXkEyXkFqcGc@._V1_.jpg".to_string(),
-            desc: Some("more you think about it, more it makes you realize how flawed the story is".to_string()),
-            score: 6.0,
-        },
-        MediaItem {
-            name: "Breaking Bad".to_string(),
-            category: "tv".to_string(),
-            tags: None,
-            image: "https://m.media-amazon.com/images/M/MV5BMzU5ZGYzNmQtMTdhYy00OGRiLTg0NmQtYjVjNzliZTg1ZGE4XkEyXkFqcGc@._V1_.jpg".to_string(),
-            desc: None,
-            score: 8.5,
-        },
-        MediaItem {
-            name: "Eighty Six".to_string(),
-            category: "anime".to_string(),
-            tags: None,
-            image: "https://m.media-amazon.com/images/M/MV5BOWNmY2IzOGItMmQyNy00ZTM0LThiNjItODM3YzdkYjRlNWU1XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg".to_string(),
-            desc: Some("season 2 is much better, and the ending is really well wrapped up".to_string()),
-            score: 8.6,
-        },
-        MediaItem {
-            name: "Spy X Family".to_string(),
-            category: "anime".to_string(),
-            tags: Some(vec!["nam's recommended".to_string()]),
-            image: "https://m.media-amazon.com/images/M/MV5BZDkwNjc0NWEtNzJlOC00N2YwLTk4MjktZGFlZDE2Y2QzOWI0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg".to_string(),
-            desc: Some("really comfy".to_string()),
-            score: 9.0,
-        },
-        MediaItem {
-            name: "Love is War".to_string(),
-            category: "anime".to_string(),
-            tags: Some(vec!["nam's recommended".to_string()]),
-            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZ8uWVp4-mIpRO0NQ2JdmRt1bS7gE-m-wUWiUvgkpmqSlH5mXlkbL9NkuCWbcx1wWpkwuI&s=10".to_string(),
-            desc: Some("i usually don't watch romance anime because they make me feel lonely but this is way too over the top and funny. funny enough to make me laugh even during the rewatch".to_string()),
-            score: 9.0,
-        },
-        MediaItem {
-            name: "Love is War: Stairway to Adulthood".to_string(),
-            category: "anime movie".to_string(),
-            tags: None,
-            image: "https://m.media-amazon.com/images/M/MV5BMjE3OTAyZTAtNmUxNy00ZjA0LTgzZGEtZjYwMjk3NzNjYTdmXkEyXkFqcGc@._V1_QL75_UY281_CR5,0,190,281_.jpg".to_string(),
-            desc: Some("some funny moments but does not live up to the hype".to_string()),
-            score: 6.7,
-        },
-        MediaItem {
-            name: "Arcane".to_string(),
-            category: "tv".to_string(),
-            tags: None,
-            image: "https://m.media-amazon.com/images/M/MV5BYjA2NzhlMDItNWRmZC00MzRjLWE3ZjAtZjBlZDAwOWY2ODdjXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg".to_string(),
-            desc: Some("season 1 is great, season 2 is meh".to_string()),
-            score: 8.5,
-        },
-    ]
+    REVIEWS
+        .split("\n---")
+        .filter_map(|block| {
+            let block = block.trim_matches(|c| c == '-' || c == '\n');
+            let mut lines = block.lines();
+            let name = lines.next()?.trim();
+            if name.is_empty() {
+                return None;
+            }
+            let tags = lines.next().unwrap_or("").trim();
+            let category = lines.next().unwrap_or("").trim();
+            let score = lines.next().unwrap_or("0").trim();
+            let image = lines.next().unwrap_or("").trim();
+            let desc = lines.collect::<Vec<_>>().join("\n");
+            let desc = desc.trim();
+            Some(MediaItem {
+                name: name.to_string(),
+                category: category.to_string(),
+                tags: (!tags.is_empty())
+                    .then(|| tags.split(',').map(|t| t.trim().to_string()).collect()),
+                image: image.to_string(),
+                desc: (!desc.is_empty()).then(|| desc.to_string()),
+                score: score.parse().unwrap_or(0.0),
+            })
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_reviews() {
+        let media = get_media();
+        assert_eq!(media.len(), 23);
+        let balatro = &media[0];
+        assert_eq!(balatro.name, "Balatro");
+        assert_eq!(balatro.tags.as_ref().unwrap().len(), 2);
+        assert_eq!(balatro.score, 10.0);
+        let reze = media.iter().find(|m| m.name == "Reze Arc").unwrap();
+        assert!(reze.tags.is_none());
+        assert!(reze.desc.is_some());
+        let boi = media.iter().find(|m| m.name == "The Beginning Of Infinity").unwrap();
+        assert!(boi.desc.is_none());
+        assert!(media.iter().all(|m| !m.image.is_empty() && !m.category.is_empty()));
+    }
 }
