@@ -29,6 +29,15 @@
         .art-item img {
             width: 100%;
             height: auto;
+            transition: transform 180ms ease;
+        }
+
+        .art-item:nth-child(odd):hover img {
+            transform: scale(1.02) rotate(-1.5deg);
+        }
+
+        .art-item:nth-child(even):hover img {
+            transform: scale(1.02) rotate(1.5deg);
         }
 
         .art-item img.art-pixel {
@@ -42,12 +51,15 @@
             inset: 0;
             width: 100%;
             height: 100%;
+            max-width: none;
+            max-height: none;
             padding: 0;
             margin: 0;
             border: 0;
             background: transparent;
             outline: none;
             overflow: hidden;
+            touch-action: pan-y pinch-zoom;
             opacity: 0;
             visibility: hidden;
             transform: scale(0.96);
@@ -77,32 +89,99 @@
             background: rgb(0 0 0 / 0.82);
         }
 
-        .art-lightbox img {
+        .art-polaroid {
+            position: relative;
             max-width: 96vw;
             max-height: 90vh;
-            width: auto;
-            height: auto;
+            padding: 0.75rem 0.75rem 2.75rem;
+            background: white;
+            box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.35);
             cursor: zoom-out;
             opacity: 0;
-            transform: scale(0.98);
+            transform: translateX(1.25rem) rotate(var(--tilt, 0deg)) scale(var(--photo-scale, 1));
             transition:
                 opacity 180ms ease,
                 transform 180ms ease;
         }
 
-        .art-lightbox img.is-loaded {
+        .art-polaroid.is-loaded {
             opacity: 1;
-            transform: scale(1);
+            transform: translateX(0) rotate(var(--tilt, 0deg)) scale(var(--photo-scale, 1));
+        }
+
+        .art-polaroid.is-exiting {
+            opacity: 0;
+            transform: translateX(-1.25rem) rotate(var(--tilt, 0deg)) scale(var(--photo-scale, 1));
+        }
+
+        .art-polaroid img {
+            display: block;
+            max-width: calc(96vw - 1.5rem);
+            max-height: calc(90vh - 3.5rem);
+            width: auto;
+            height: auto;
+        }
+
+        .art-tape {
+            position: absolute;
+            width: 4.5rem;
+            height: 1.75rem;
+            pointer-events: none;
+            filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.18));
+            transform: rotate(var(--tape-rotate, 0deg));
+        }
+
+        .art-tape polygon {
+            fill: rgb(238 230 204 / 0.88);
+        }
+
+        .art-tape-top {
+            top: -0.65rem;
+            left: -0.85rem;
+        }
+
+        .art-tape-bottom {
+            bottom: -0.65rem;
+            right: -0.85rem;
         }
 
         .art-lightbox-close {
             position: fixed;
+            z-index: 1;
             top: 1rem;
             right: 1rem;
             color: white;
             cursor: pointer;
             background: rgb(0 0 0 / 0.55);
             padding: 0.5rem 0.75rem;
+        }
+
+        .art-lightbox-nav {
+            display: flex;
+            gap: 0.75rem;
+            position: fixed;
+            z-index: 1;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .art-lightbox-nav button {
+            display: grid;
+            place-items: center;
+            width: 2.75rem;
+            height: 2.75rem;
+            padding: 0;
+            color: white;
+            cursor: pointer;
+            background: rgb(0 0 0 / 0.55);
+            font-size: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            .art-polaroid {
+                --photo-scale: 0.85;
+            }
         }
 
         .art-filter-button.is-active {
@@ -148,14 +227,26 @@
         <option value="desc">newest first</option>
         <option value="asc">oldest first</option>
     </select>
-    <button id="art-best-filter" type="button" class="art-filter-button bg-neutral-100 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 px-2 py-2 text-sm cursor-pointer">better stuff</button>
+    <button id="art-best-filter" type="button" class="art-filter-button bg-neutral-100 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 px-2 py-2 text-sm cursor-pointer">portfolio-esque</button>
 </div>
 
 <div class="art-masonry" id="art-masonry"></div>
 
 <dialog class="art-lightbox" id="art-lightbox" aria-label="Expanded artwork">
     <button class="art-lightbox-close" type="button">close</button>
-    <img id="art-lightbox-image" src="" alt="">
+    <div class="art-polaroid" id="art-polaroid">
+        <img id="art-lightbox-image" src="" alt="">
+        <svg class="art-tape art-tape-top" viewBox="0 0 72 28" aria-hidden="true" focusable="false">
+            <polygon points="" />
+        </svg>
+        <svg class="art-tape art-tape-bottom" viewBox="0 0 72 28" aria-hidden="true" focusable="false">
+            <polygon points="" />
+        </svg>
+    </div>
+    <div class="art-lightbox-nav">
+        <button class="art-lightbox-prev" type="button" aria-label="Previous artwork">←</button>
+        <button class="art-lightbox-next" type="button" aria-label="Next artwork">→</button>
+    </div>
 </dialog>
 
 <script>
@@ -168,7 +259,12 @@
     let bestOnly = false;
     const lightbox = document.getElementById("art-lightbox");
     const lightboxImage = document.getElementById("art-lightbox-image");
+    const polaroid = document.getElementById("art-polaroid");
+    const tapes = document.querySelectorAll(".art-tape");
+    const previousButton = document.querySelector(".art-lightbox-prev");
+    const nextButton = document.querySelector(".art-lightbox-next");
     let closeTimer;
+    let lightboxRequest = 0;
     let currentIndex = -1;
     let currentCols = 0;
     let currentList = artworks;
@@ -177,6 +273,25 @@
         if (window.matchMedia("(min-width: 1280px)").matches) return 3;
         if (window.matchMedia("(min-width: 640px)").matches) return 2;
         return 1;
+    }
+
+    function randomTapePoints() {
+        const top = [];
+        const bottom = [];
+        for (let x = 0; x <= 72; x += 12) {
+            top.push(`${x},${Math.random() * 4}`);
+            bottom.unshift(`${x},${24 + Math.random() * 4}`);
+        }
+        return [...top, ...bottom].join(" ");
+    }
+
+    function randomizePolaroid() {
+        const direction = Math.random() < 0.5 ? -1 : 1;
+        polaroid.style.setProperty("--tilt", `${((1 + Math.random()) * direction).toFixed(2)}deg`);
+        tapes.forEach((tape) => {
+            tape.style.setProperty("--tape-rotate", `${Math.random() * 24 - 12}deg`);
+            tape.querySelector("polygon").setAttribute("points", randomTapePoints());
+        });
     }
 
     function render(force = false) {
@@ -222,41 +337,67 @@
 
     async function openLightboxAt(index) {
         if (index < 0 || index >= currentList.length) return;
+        const request = ++lightboxRequest;
         currentIndex = index;
         const art = currentList[index];
 
         window.clearTimeout(closeTimer);
-        lightbox.classList.remove("is-open");
-        lightboxImage.classList.remove("is-loaded");
-        lightboxImage.removeAttribute("src");
 
         const nextImage = new Image();
         nextImage.src = art.src;
         nextImage.alt = art.alt;
+        const decoded = nextImage.decode
+            ? nextImage.decode().catch(() => {})
+            : Promise.resolve();
 
-        if (nextImage.decode) {
-            await nextImage.decode().catch(() => {});
+        if (lightbox.open) {
+            polaroid.classList.remove("is-loaded");
+            polaroid.classList.add("is-exiting");
+            await new Promise((resolve) => window.setTimeout(resolve, 180));
+            if (request !== lightboxRequest) return;
         }
 
+        await decoded;
+        if (request !== lightboxRequest) return;
+
+        randomizePolaroid();
+        polaroid.classList.remove("is-exiting");
         lightboxImage.alt = art.alt;
         lightboxImage.src = art.src;
         if (!lightbox.open) lightbox.showModal();
         document.documentElement.style.overflow = "hidden";
+        polaroid.getBoundingClientRect();
 
         requestAnimationFrame(() => {
+            if (request !== lightboxRequest) return;
             lightbox.classList.add("is-open");
-            lightboxImage.classList.add("is-loaded");
+            polaroid.classList.add("is-loaded");
         });
     }
 
     function closeLightbox() {
+        lightboxRequest++;
         lightbox.classList.remove("is-open");
-        lightboxImage.classList.remove("is-loaded");
+        polaroid.classList.remove("is-loaded");
+        polaroid.classList.add("is-exiting");
         window.clearTimeout(closeTimer);
         closeTimer = window.setTimeout(() => {
             lightbox.close();
             document.documentElement.style.overflow = "";
         }, 180);
+    }
+
+    function stepLightbox(direction) {
+        if (currentIndex < 0 || !currentList.length) return;
+        openLightboxAt((currentIndex + direction + currentList.length) % currentList.length);
+    }
+
+    function withViewTransition(update) {
+        if (document.startViewTransition) {
+            document.startViewTransition(update);
+        } else {
+            update();
+        }
     }
 
     render(true);
@@ -267,26 +408,54 @@
         window.matchMedia(query).addEventListener("change", () => render());
     });
 
-    orderSelect.addEventListener("change", () => render(true));
+    orderSelect.addEventListener("change", () => {
+        withViewTransition(() => render(true));
+    });
 
     bestFilter.addEventListener("click", () => {
         bestOnly = !bestOnly;
-        bestFilter.classList.toggle("is-active", bestOnly);
-        render(true);
+        withViewTransition(() => {
+            bestFilter.classList.toggle("is-active", bestOnly);
+            render(true);
+        });
     });
+
+    previousButton.addEventListener("click", () => stepLightbox(-1));
+    nextButton.addEventListener("click", () => stepLightbox(1));
 
     document.addEventListener("keydown", (event) => {
         if (!lightbox.open) return;
         if (event.key === "ArrowRight") {
-            openLightboxAt((currentIndex + 1) % currentList.length);
+            stepLightbox(1);
         } else if (event.key === "ArrowLeft") {
-            openLightboxAt((currentIndex - 1 + currentList.length) % currentList.length);
+            stepLightbox(-1);
         }
     });
 
+    let touchStart;
+    lightbox.addEventListener("touchstart", (event) => {
+        if (event.touches.length !== 1) {
+            touchStart = null;
+            return;
+        }
+        const touch = event.touches[0];
+        touchStart = { x: touch.clientX, y: touch.clientY };
+    }, { passive: true });
+
+    lightbox.addEventListener("touchend", (event) => {
+        if (!touchStart) return;
+        const touch = event.changedTouches[0];
+        const deltaX = touch.clientX - touchStart.x;
+        const deltaY = touch.clientY - touchStart.y;
+        touchStart = null;
+        if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+        event.preventDefault();
+        stepLightbox(deltaX < 0 ? 1 : -1);
+    }, { passive: false });
+
     lightbox.addEventListener("close", () => {
         lightbox.classList.remove("is-open");
-        lightboxImage.classList.remove("is-loaded");
+        polaroid.classList.remove("is-loaded", "is-exiting");
         lightboxImage.removeAttribute("src");
         lightboxImage.alt = "";
         currentIndex = -1;
@@ -302,7 +471,7 @@
         if (
             event.target === lightbox ||
             event.target.classList.contains("art-lightbox-close") ||
-            event.target === lightboxImage
+            event.target.closest(".art-polaroid")
         ) {
             closeLightbox();
         }
