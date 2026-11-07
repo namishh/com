@@ -1,0 +1,19 @@
+---
+title: Mind Cryonics & Art 
+description: how do i preserve my mind 
+date: 7 Nov 2026
+draft: false
+---
+
+I have been wrong about AI. 2024, I had a prediction that I will have enough industry experience before AI programming gets any good to replace the junior developers. Not even half of my college education through, and AI capabilities have vastly increased and the buzzword counter has already overflowed and I have stopped keeping track of them.
+<br>
+The levels of larp on the internet has gone to an all time high, with AI doing all the heavy lifting, and people parading around the claude output as their proud project, or their own PR in a big starry open source repository. It is one of the reasons I have been less and less interested in talking about tech because the art of programming I used to admire from other people is being hidden by fast food programming of a random who cannot answer what the code does. What does the art of programming even mean, you ask? <br>
+Well I wish I could give you a clear answer, but it is something I cannot express well in words. It is not just producing the most optimised code, although that is what programming is all about, optimisation. The bar of what one considers "art" is highly philosophical and subjective. For me, a core component of art, is also the effort and the mastery of the process. In the same way, I prefer human made art over AI, because I deeply value the mastery and precision of each stroke landing where it is supposed to be. 
+<br>
+If we are offloading everything to AI, what control over our mind do we even have left. How long is the facade of "it only implements the monotonous code part and I make all the important decisions" going to last before that also goes away.
+ AI is going to stay, regardless of there being a bubble or not and it will change how humans function.<br>
+Whether you have a true self or not, the mind still exists, and I have been for a long time, thinking how do I preserve my brain for the next age, how do I prevent it from going to mush. How do you preserve your brain as a teen in this era of acceleration. How do you keep agency over your mind when everything is being dumbed down.
+<br>
+Art, or mastering art, or that is the conclusion I came to while thinking. For me, mastery, is part of the art itself *(art, the word might have some rigit defition and etymology, but in this day and age, the term is more loose than ever)*, and art could be anything. Programming, a new sport, reading, I would argue the way you watch and interpret movies is an art in itself. Mastery, makes you, want to be competent, and competency is the real key to prevent your brain from turning into mush. The strive to be better in whatever form of art resonates with a person, instead of just being "decent". Your brain can be un-mush and use AI at the same time, but that takes into account that the person would be able to handle it just fine even if AI was temporarily taken away. If you are writing a non technical blog and even that is polished with LLMs, sign of late stage AI psychosis. Writing blog posts that are engaging, is in fact a form of art. I have a lot of blog posts which are embarassing to read still up now and it all has cumlminated into me typing this post now.
+<br>
+For me, I chose to draw since I was tired of tech for a while, and I really wanted to be good at it. Learning a new skill at such a late stage with a hectic uni life was humbling. Very humbling. But there is some beauty in seeing myself improve over time because I just really wanted to be good at it. I am still an amateur, it has been only 5 months since I started digital art, but amateur is still human.
