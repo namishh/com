@@ -4,6 +4,12 @@
     {{ super() }}
     <script src="/static/gol.js" defer></script>
     <style>
+        .since-toggle {
+            cursor: pointer;
+            background: rgba(128, 128, 128, 0.25);
+            padding: 0 4px;
+        }
+
         .art-masonry {
             display: flex;
             gap: 1rem;
@@ -218,7 +224,7 @@
 {% endblock meta %}
 {% block content %}
 
-<h2 class="mb-4 text-normal">digital artist since may 2026. self taught. i use <a href="https://xp-pen.co.in/products/deco-01-v3" target="_blank" class="link">deco v1 03</a> and <a href="https://krita.org" target='_blank' class='link'>krita</a>. these are mostly art studies, and not original art. if i make enough original content, i  will separate them out in the future.</h2>
+<h2 class="mb-4 text-normal">digital artist <span id="since-date" class="since-toggle">since may 2026</span>. self taught. i use <a href="https://xp-pen.co.in/products/deco-01-v3" target="_blank" class="link">deco v1 03</a> and <a href="https://krita.org" target='_blank' class='link'>krita</a>. these are mostly art studies, and not original art. if i make enough original content, i  will separate them out in the future.</h2>
 
 <p class="mb-4 text-normal"></p>
 
@@ -475,6 +481,24 @@
         ) {
             closeLightbox();
         }
+    });
+</script>
+
+<script>
+    const sinceEl = document.getElementById("since-date");
+    sinceEl.addEventListener("click", () => {
+        if (sinceEl.dataset.rel) {
+            sinceEl.textContent = "since may 2026";
+            delete sinceEl.dataset.rel;
+            return;
+        }
+        const months = Math.max(0, Math.floor((Date.now() - new Date(2026, 4, 1)) / 2629800000));
+        const rtf = new Intl.RelativeTimeFormat("en");
+        const dur = (months < 12
+            ? rtf.format(-(months || 1), "month")
+            : rtf.format(-Math.floor(months / 12), "year")).replace(" ago", "");
+        sinceEl.textContent = `for ${dur} now`;
+        sinceEl.dataset.rel = "1";
     });
 </script>
 
